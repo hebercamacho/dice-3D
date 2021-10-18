@@ -1,59 +1,193 @@
-#include <fmt/core.h>
-
 #include "openglwindow.hpp"
 
+#include <fmt/core.h>
 #include <imgui.h>
 
+#include <cppitertools/itertools.hpp>
+
 void OpenGLWindow::initializeGL() {
-  auto windowSettings{getWindowSettings()};
-  fmt::print("Initial window size: {}x{}\n", windowSettings.width,
-             windowSettings.height);
+  // Load a new font
+  ImGuiIO &io{ImGui::GetIO()};
+  const auto filename{getAssetsPath() + "Inconsolata-Medium.ttf"};
+  m_font = io.Fonts->AddFontDefault();
+  if (m_font == nullptr) {
+    throw abcg::Exception{abcg::Exception::Runtime("Cannot load font file")};
+  }
+
+  abcg::glClearColor(0, 0, 0, 1);
+
+  restart();
 }
 
-void OpenGLWindow::paintGL() {
-  // Set the clear color
-  abcg::glClearColor(m_clearColor[0], m_clearColor[1], m_clearColor[2],
-                     m_clearColor[3]);
-  // Clear the color buffer
-  abcg::glClear(GL_COLOR_BUFFER_BIT);
-}
+void OpenGLWindow::paintGL() { abcg::glClear(GL_COLOR_BUFFER_BIT); }
 
 void OpenGLWindow::paintUI() {
-  // Parent class will show fullscreen button and FPS meter
-  abcg::OpenGLWindow::paintUI();
+  const auto appWindowWidth{static_cast<float>(getWindowSettings().width)};
+  const auto appWindowHeight{static_cast<float>(getWindowSettings().height)};
 
-  // Our own ImGui widgets go below
+  // "Tic-Tac-Toe" window
   {
-    ImGui::SetNextWindowSize(ImVec2(300, 100));
-    auto flags{ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize};
-    ImGui::Begin("Window with menu", nullptr, flags);
-    {
-    bool save{};
-    static bool showCompliment{};  // Hold state
+    ImGui::SetNextWindowSize(ImVec2(appWindowWidth, appWindowHeight));
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
 
-    // Menu Bar
-    if (ImGui::BeginMenuBar()) {
-        // File menu
-        if (ImGui::BeginMenu("File")) {
-        ImGui::MenuItem("Save", nullptr, &save);
-        ImGui::EndMenu();
-        }
-        // View menu
-        if (ImGui::BeginMenu("View")) {
-        ImGui::MenuItem("Show Compliment", nullptr, &showCompliment);
-        ImGui::EndMenu();
+    const auto flags{ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize};
+    ImGui::Begin("Tic-Tac-Toe", nullptr, flags);
+
+    // Menu
+    {
+      bool restartSelected{};
+      if (ImGui::BeginMenuBar()) {
+        if (ImGui::BeginMenu("Game")) {
+          ImGui::MenuItem("Restart", nullptr, &restartSelected);
+          ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
+      }
+      if (restartSelected) restart();
     }
 
-    if (save) {
-        // Save file...
+    // Static text (win/draw message)
+    std::string text;
+    switch (m_gameState) {
+      case GameState::Play:
+        text = fmt::format("{} turn", m_turn ? 'X' : 'O');
+        break;
+      case GameState::Draw:
+        text = "Draw!";
+        break;
+      case GameState::WinX:
+        text = "X is the winner!";
+        break;
+      case GameState::WinO:
+        text = "O is the winner!";
+        break;
+    }
+    ImGui::SetCursorPosX(
+        (appWindowWidth - ImGui::CalcTextSize(text.c_str()).x) / 2);
+    ImGui::Text("%s", text.c_str());
+    ImGui::Spacing();
+    ImGui::Spacing();
+
+    // Create game board
+    const auto gridHeight{appWindowHeight - 22 - 58 - (m_N * 10) - 58};
+    ImGui::PushFont(m_font);
+    // For each row
+    for (auto i : iter::range(m_N)) {
+      ImGui::Columns(m_N);
+      // For each column
+      for (auto j : iter::range(m_N)) {
+        auto offset{i * m_N + j};
+        std::string text{fmt::format("{}", m_board.at(offset))};
+        ImGui::Button(text.c_str(), ImVec2(-1, gridHeight / m_N));
+        if (m_gameState == GameState::Play && m_board.at(offset) == 0) {
+          if (ImGui::IsItemClicked()) {
+            m_board.at(offset) = m_turn ? 'X' : 'O';
+            checkBoard();
+            m_turn = !m_turn;
+          }
+        }
+        ImGui::NextColumn();
+      }
+      if (i < 2) ImGui::Separator();
+    }
+    ImGui::Columns(1);
+    ImGui::PopFont();
+
+    ImGui::Spacing();
+    ImGui::Spacing();
+
+    // "Restart game" button
+    {
+      if (ImGui::Button("Restart game", ImVec2(-1, 50.0f))) {
+        restart();
+      }
     }
 
-    if (showCompliment) {
-        ImGui::Text("You're a beautiful person.");
-    }
-    }
     ImGui::End();
   }
+}
+
+void OpenGLWindow::checkBoard() {
+  if (m_gameState != GameState::Play) return;
+
+  // Check rows
+  for (const auto i : iter::range(m_N)) {
+    std::string concatenation{};
+    for (const auto j : iter::range(m_N)) {
+      const auto offset{i * m_N + j};
+      concatenation += m_board.at(offset);
+    }
+    if (concatenation == std::string(m_N, 'X')) {
+      m_gameState = GameState::WinX;
+      return;
+    }
+    if (concatenation == std::string(m_N, 'O')) {
+      m_gameState = GameState::WinO;
+      return;
+    }
+  }
+
+  // Check columns
+  for (const auto j : iter::range(m_N)) {
+    std::string concatenation{};
+    for (const auto i : iter::range(m_N)) {
+      const auto offset{i * m_N + j};
+      concatenation += m_board.at(offset);
+    }
+    if (concatenation == std::string(m_N, 'X')) {
+      m_gameState = GameState::WinX;
+      return;
+    }
+    if (concatenation == std::string(m_N, 'O')) {
+      m_gameState = GameState::WinO;
+      return;
+    }
+  }
+
+  // Check main diagonal
+  std::string concatenation{};
+  for (const auto i : iter::range(m_N)) {
+    const auto offset{i * m_N + i};
+    concatenation += m_board.at(offset);
+  }
+  if (concatenation == std::string(m_N, 'X')) {
+    m_gameState = GameState::WinX;
+    return;
+  }
+  if (concatenation == std::string(m_N, 'O')) {
+    m_gameState = GameState::WinO;
+    return;
+  }
+
+  // Check inverse diagonal
+  concatenation.clear();
+  for (const auto i : iter::range(m_N)) {
+    const auto offset{i * m_N + (m_N - i - 1)};
+    concatenation += m_board.at(offset);
+  }
+  if (concatenation == std::string(m_N, 'X')) {
+    m_gameState = GameState::WinX;
+    return;
+  }
+  if (concatenation == std::string(m_N, 'O')) {
+    m_gameState = GameState::WinO;
+    return;
+  }
+
+  // Check draw
+  concatenation.clear();
+  for (const auto i : iter::range(m_N)) {
+    for (const auto j : iter::range(m_N)) {
+      const auto offset{i * m_N + j};
+      if (m_board.at(offset) != 0) concatenation += m_board.at(offset);
+    }
+  }
+  if (concatenation.length() == m_N * m_N) {
+    m_gameState = GameState::Draw;
+  }
+}
+
+void OpenGLWindow::restart() {
+  m_gameState = GameState::Play;
+  m_board.fill(0);
 }
