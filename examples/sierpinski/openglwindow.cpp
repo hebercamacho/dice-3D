@@ -6,7 +6,7 @@
 #include <chrono>
 
 void OpenGLWindow::initializeGL() {
-    const auto *vertexShader{R"gl(
+  const auto *vertexShader{R"gl(
     #version 410
     layout(location = 0) in vec2 inPosition;
     void main() { 
@@ -38,8 +38,8 @@ void OpenGLWindow::initializeGL() {
   fmt::print("Point size: {:.2f} (min), {:.2f} (max)\n", sizes[0], sizes[1]);
 
   // Start pseudo-random number generator
-  auto seed{std::chrono::steady_clock::now().time_since_epoch().count()};
-  m_randomEngine.seed(seed);
+  m_randomEngine.seed(
+      std::chrono::steady_clock::now().time_since_epoch().count());
 
   // Randomly choose a pair of coordinates in the interval [-1; 1]
   std::uniform_real_distribution<float> realDistribution(-1.0f, 1.0f);
@@ -48,7 +48,7 @@ void OpenGLWindow::initializeGL() {
 }
 
 void OpenGLWindow::paintGL() {
-    // Create OpenGL buffers for the single point at m_P
+  // Create OpenGL buffers for the single point at m_P
   setupModel();
 
   // Set the viewport
@@ -69,14 +69,14 @@ void OpenGLWindow::paintGL() {
 
   // Randomly choose a triangle vertex index
   std::uniform_int_distribution<int> intDistribution(0, m_points.size() - 1);
-  int index{intDistribution(m_randomEngine)};
+  const int index{intDistribution(m_randomEngine)};
 
   // The new position is the midpoint between the current position and the
   // chosen vertex
   m_P = (m_P + m_points.at(index)) / 2.0f;
 
   // Print coordinates to the console
-  fmt::print("({:+.2f}, {:+.2f})\n", m_P.x, m_P.y);
+  // fmt::print("({:+.2f}, {:+.2f})\n", m_P.x, m_P.y);
 }
 
 void OpenGLWindow::paintUI() {
@@ -99,6 +99,13 @@ void OpenGLWindow::resizeGL(int width, int height) {
   m_viewportHeight = height;
 
   abcg::glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void OpenGLWindow::terminateGL() {
+  // Release shader program, VBO and VAO
+  abcg::glDeleteProgram(m_program);
+  abcg::glDeleteBuffers(1, &m_vboVertices);
+  abcg::glDeleteVertexArrays(1, &m_vao);
 }
 
 void OpenGLWindow::setupModel() {
@@ -133,11 +140,4 @@ void OpenGLWindow::setupModel() {
 
   // End of binding to current VAO
   abcg::glBindVertexArray(0);
-}
-
-void OpenGLWindow::terminateGL() {
-  // Release shader program, VBO and VAO
-  abcg::glDeleteProgram(m_program);
-  abcg::glDeleteBuffers(1, &m_vboVertices);
-  abcg::glDeleteVertexArrays(1, &m_vao);
 }
