@@ -41,6 +41,11 @@ void OpenGLWindow::initializeGL() {
   // Start pseudo-random number generator
   auto seed{std::chrono::steady_clock::now().time_since_epoch().count()};
   m_randomEngine.seed(seed);
+
+  //Habilitar modo de mistura de cores
+  glEnable(GL_BLEND);
+  glBlendEquation(GL_FUNC_ADD);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 
@@ -107,6 +112,12 @@ void OpenGLWindow::setupModel() {
   std::array<glm::vec2, 3> positions{glm::vec2(rd(m_randomEngine), rd(m_randomEngine)), //ALTEREI AQUI, DIFERENTE DO PROFESSOR
                                     glm::vec2(rd(m_randomEngine), rd(m_randomEngine)),
                                     glm::vec2(rd(m_randomEngine), rd(m_randomEngine))};
+                          
+  //Cores aleatórias
+  std::uniform_real_distribution<float> rdc(0.0f, 1.0f);
+  m_vertexColors[0] = glm::vec4(rdc(m_randomEngine), rdc(m_randomEngine), rdc(m_randomEngine), 0.5f);
+  m_vertexColors[1] = glm::vec4(rdc(m_randomEngine), rdc(m_randomEngine), rdc(m_randomEngine), 0.5f);
+  m_vertexColors[2] = glm::vec4(rdc(m_randomEngine), rdc(m_randomEngine), rdc(m_randomEngine), 0.5f);
 
   // Create vertex colors
   std::vector<glm::vec4> colors(0);
