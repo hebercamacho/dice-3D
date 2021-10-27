@@ -28,3 +28,5 @@ compile_commands.json
 public/*.data
 public/*.js
 public/*.wasm
+
+*.exe
