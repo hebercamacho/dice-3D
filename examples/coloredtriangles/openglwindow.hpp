@@ -32,6 +32,8 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   bool pausado = true; //pausa o programa se false
   bool random_colors = true; //cores aleatórias se true
   bool flat_colors = true; //cores sólidas se true
+  int cont = 0;
+  int delay = 100;
   void setupModel();
 };
 #endif

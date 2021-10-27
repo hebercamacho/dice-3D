@@ -51,7 +51,7 @@ void OpenGLWindow::initializeGL() {
 
 
 void OpenGLWindow::paintGL() {
-  if(pausado)
+  if(pausado && cont % delay == 0 && cont != delay)
     setupModel();
 
   abcg::glViewport(0, 0, m_viewportWidth, m_viewportHeight);  // Set the viewport
@@ -63,13 +63,17 @@ void OpenGLWindow::paintGL() {
 
   abcg::glBindVertexArray(0);  // End using VAO
   abcg::glUseProgram(0);  // End using the shader program
+
+  if(cont == 600)
+   cont = 0;
+  else cont++;
 }
 
 void OpenGLWindow::paintUI() {
   abcg::OpenGLWindow::paintUI();
 
   {
-    auto widgetSize{ImVec2(250, 150)};
+    auto widgetSize{ImVec2(250, 200)};
     ImGui::SetNextWindowPos(ImVec2(m_viewportWidth - widgetSize.x - 5
                                   ,m_viewportHeight - widgetSize.y - 5));
     ImGui::SetNextWindowSize(widgetSize); //definem a posição e tamanho da janela da ImGui que está prestes a ser criada
@@ -89,6 +93,8 @@ void OpenGLWindow::paintUI() {
     ImGui::ColorEdit3("v1", &m_vertexColors[1].x, colorEditFlags);
     ImGui::ColorEdit3("v2", &m_vertexColors[2].x, colorEditFlags);
     ImGui::PopItemWidth();
+
+    ImGui::SliderInt("Delay", &delay, 1, 600, "%d", ImGuiSliderFlags_None);
 
     ImGui::End();
   }
