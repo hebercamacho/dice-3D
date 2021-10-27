@@ -29,7 +29,7 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   std::array<glm::vec4, 3> m_vertexColors{glm::vec4{ 0.36f, 0.83f, 1.00f, 0.5f}, 
                                           glm::vec4{ 0.63f, 0.00f, 0.61f, 0.5f},
                                           glm::vec4{ 1.00f, 0.69f, 0.30f, 0.5f}};
-
+  bool pausado = true;
   void setupModel();
 };
 #endif

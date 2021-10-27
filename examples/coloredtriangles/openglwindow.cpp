@@ -46,11 +46,13 @@ void OpenGLWindow::initializeGL() {
   glEnable(GL_BLEND);
   glBlendEquation(GL_FUNC_ADD);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ 
 }
 
 
 void OpenGLWindow::paintGL() {
-  setupModel();
+  if(pausado)
+    setupModel();
 
   abcg::glViewport(0, 0, m_viewportWidth, m_viewportHeight);  // Set the viewport
 
@@ -67,12 +69,15 @@ void OpenGLWindow::paintUI() {
   abcg::OpenGLWindow::paintUI();
 
   {
-    auto widgetSize{ImVec2(250, 90)};
+    auto widgetSize{ImVec2(250, 150)};
     ImGui::SetNextWindowPos(ImVec2(m_viewportWidth - widgetSize.x - 5
                                   ,m_viewportHeight - widgetSize.y - 5));
     ImGui::SetNextWindowSize(widgetSize); //definem a posição e tamanho da janela da ImGui que está prestes a ser criada
     auto windowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar}; // flags para que ela não possa ser redimensionada e não tenha a barra de título
     ImGui::Begin(" ", nullptr, windowFlags);
+
+    
+    ImGui::Checkbox("Pause", &pausado);
 
     //Edit vertex colors
     auto colorEditFlags{ImGuiColorEditFlags_NoTooltip | //Os controles ImGui::ColorEdit3 também são criados com flags para desabilitar o color picker (ImGuiColorEditFlags_NoPicker) e os tooltips (ImGuiColorEditFlags_NoTooltip), pois eles podem atrapalhar o desenho dos triângulos.
