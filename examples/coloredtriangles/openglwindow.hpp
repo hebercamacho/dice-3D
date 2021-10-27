@@ -26,10 +26,12 @@ class OpenGLWindow : public abcg::OpenGLWindow {
 
   std::default_random_engine m_randomEngine;
 
-  std::array<glm::vec4, 3> m_vertexColors{glm::vec4{ 0.36f, 0.83f, 1.00f, 0.5f}, 
-                                          glm::vec4{ 0.63f, 0.00f, 0.61f, 0.5f},
-                                          glm::vec4{ 1.00f, 0.69f, 0.30f, 0.5f}};
-  bool pausado = true;
+  std::array<glm::vec4, 3> m_vertexColors{glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f}, 
+                                          glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f},
+                                          glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f}};
+  bool pausado = true; //pausa o programa se false
+  bool random_colors = true; //cores aleatórias se true
+  bool flat_colors = true; //cores sólidas se true
   void setupModel();
 };
 #endif

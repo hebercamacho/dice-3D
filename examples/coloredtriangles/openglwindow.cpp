@@ -76,8 +76,10 @@ void OpenGLWindow::paintUI() {
     auto windowFlags{ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar}; // flags para que ela não possa ser redimensionada e não tenha a barra de título
     ImGui::Begin(" ", nullptr, windowFlags);
 
-    
+    //caixa de opções
     ImGui::Checkbox("Pause", &pausado);
+    ImGui::Checkbox("Cores sólidas", &flat_colors);
+    ImGui::Checkbox("Cores aleatórias", &random_colors);
 
     //Edit vertex colors
     auto colorEditFlags{ImGuiColorEditFlags_NoTooltip | //Os controles ImGui::ColorEdit3 também são criados com flags para desabilitar o color picker (ImGuiColorEditFlags_NoPicker) e os tooltips (ImGuiColorEditFlags_NoTooltip), pois eles podem atrapalhar o desenho dos triângulos.
@@ -119,10 +121,17 @@ void OpenGLWindow::setupModel() {
                                     glm::vec2(rd(m_randomEngine), rd(m_randomEngine))};
                           
   //Cores aleatórias
-  std::uniform_real_distribution<float> rdc(0.0f, 1.0f);
-  m_vertexColors[0] = glm::vec4(rdc(m_randomEngine), rdc(m_randomEngine), rdc(m_randomEngine), 0.5f);
-  m_vertexColors[1] = glm::vec4(rdc(m_randomEngine), rdc(m_randomEngine), rdc(m_randomEngine), 0.5f);
-  m_vertexColors[2] = glm::vec4(rdc(m_randomEngine), rdc(m_randomEngine), rdc(m_randomEngine), 0.5f);
+  if(random_colors){
+    std::uniform_real_distribution<float> rdc(0.0f, 1.0f);
+    m_vertexColors[0] = glm::vec4(rdc(m_randomEngine), rdc(m_randomEngine), rdc(m_randomEngine), 0.8f);
+    m_vertexColors[1] = glm::vec4(rdc(m_randomEngine), rdc(m_randomEngine), rdc(m_randomEngine), 0.8f);
+    m_vertexColors[2] = glm::vec4(rdc(m_randomEngine), rdc(m_randomEngine), rdc(m_randomEngine), 0.8f);
+  }
+  
+  //Cores sólidas
+  if(flat_colors){
+    m_vertexColors[0] = m_vertexColors[1] = m_vertexColors[2];
+  }
 
   // Create vertex colors
   std::vector<glm::vec4> colors(0);
