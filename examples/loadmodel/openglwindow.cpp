@@ -33,7 +33,7 @@ void OpenGLWindow::initializeGL() {
                                     getAssetsPath() + "loadmodel.frag");
 
   // Load model
-  loadModelFromFile(getAssetsPath() + "bunny.obj"); //carregamento do .obj
+  loadModelFromFile(getAssetsPath() + "teapot.obj"); //carregamento do .obj
   standardize();
 
   m_verticesToDraw = m_indices.size();
