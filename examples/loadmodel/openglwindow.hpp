@@ -36,7 +36,7 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   std::vector<Vertex> m_vertices;
   std::vector<GLuint> m_indices;
 
-  void loadModelFromFile(std::string_view path);
+  void loadModelFromFile(std::string path);
   void standardize();
 };
 
