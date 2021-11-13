@@ -5,6 +5,7 @@
 
 #include "abcg.hpp"
 
+//atributos que definem um vértice: posição 3D e operador == pra verificar se um vértice é igual a outro
 struct Vertex {
   glm::vec3 position;
 
@@ -30,14 +31,14 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   int m_viewportWidth{};
   int m_viewportHeight{};
 
-  float m_angle{};
-  int m_verticesToDraw{};
+  float m_angle{}; // ângulo de rotação que será enviado à variável uniforme do vertex shader.
+  int m_verticesToDraw{}; //quantidade de vértices do VBO que será processada pela função de renderização, glDrawElements
 
-  std::vector<Vertex> m_vertices;
-  std::vector<GLuint> m_indices;
+  std::vector<Vertex> m_vertices; //arranjo de vértices lido do arquivo OBJ que será enviado ao VBO
+  std::vector<GLuint> m_indices; //arranjo de indices lido do arquivo OBJ que será enviado ao EBO
 
-  void loadModelFromFile(std::string path);
-  void standardize();
+  void loadModelFromFile(std::string path); //função para carregamento do arquivo OBJ
+  void standardize(); //função para centralizar o modelo na origem e normalizar as coordenadas de todos os vértices no intervalo [-1,1]
 };
 
 #endif

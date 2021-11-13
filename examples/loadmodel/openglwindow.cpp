@@ -12,9 +12,11 @@
 // Explicit specialization of std::hash for Vertex
 namespace std {
 template <>
+//necessário para podermos usar Vertex como chave para pegar um valor de índice de uma tabela hash 
+//isso ajuda a compactar bem nossa geometria indexada
 struct hash<Vertex> {
   size_t operator()(Vertex const& vertex) const noexcept {
-    const std::size_t h1{std::hash<glm::vec3>()(vertex.position)};
+    const std::size_t h1{std::hash<glm::vec3>()(vertex.position)}; //como é 3D e hash já possui uma especialização para vec3, vamos usar isso por enquanto
     return h1;
   }
 };
@@ -24,14 +26,14 @@ void OpenGLWindow::initializeGL() {
   abcg::glClearColor(0, 0, 0, 1);
 
   // Enable depth buffering
-  abcg::glEnable(GL_DEPTH_TEST);
+  abcg::glEnable(GL_DEPTH_TEST); //descartar fragmentos dependendo da profundidade
 
   // Create program
   m_program = createProgramFromFile(getAssetsPath() + "loadmodel.vert",
                                     getAssetsPath() + "loadmodel.frag");
 
   // Load model
-  loadModelFromFile(getAssetsPath() + "bunny.obj");
+  loadModelFromFile(getAssetsPath() + "bunny.obj"); //carregamento do .obj
   standardize();
 
   m_verticesToDraw = m_indices.size();
@@ -70,6 +72,7 @@ void OpenGLWindow::initializeGL() {
   abcg::glBindVertexArray(0);
 }
 
+//carregar e ler o arquivo .obj, armazenar vertices e indices em m_vertices e m_indices.
 void OpenGLWindow::loadModelFromFile(std::string path) {
   tinyobj::ObjReader reader;
 
@@ -86,8 +89,8 @@ void OpenGLWindow::loadModelFromFile(std::string path) {
     fmt::print("Warning: {}\n", reader.Warning());
   }
 
-  const auto& attrib{reader.GetAttrib()};
-  const auto& shapes{reader.GetShapes()};
+  const auto& attrib{reader.GetAttrib()}; //conjunto de vertices
+  const auto& shapes{reader.GetShapes()}; //conjunto de malhas
 
   m_vertices.clear();
   m_indices.clear();
@@ -95,9 +98,9 @@ void OpenGLWindow::loadModelFromFile(std::string path) {
   // A key:value map with key=Vertex and value=index
   std::unordered_map<Vertex, GLuint> hash{};
 
-  // Loop over shapes
+  // ler todos os triangulos e vertices
   for (const auto& shape : shapes) {
-    // Loop over indices
+    // pra cada um dos indices
     for (const auto offset : iter::range(shape.mesh.indices.size())) {
       // Access to vertex
       const tinyobj::index_t index{shape.mesh.indices.at(offset)};
@@ -109,25 +112,27 @@ void OpenGLWindow::loadModelFromFile(std::string path) {
       const float vz{attrib.vertices.at(startIndex + 2)};
 
       Vertex vertex{};
-      vertex.position = {vx, vy, vz};
-
+      vertex.position = {vx, vy, vz}; //a chave do vertex é sua posição
+    
       // If hash doesn't contain this vertex
       if (hash.count(vertex) == 0) {
         // Add this index (size of m_vertices)
-        hash[vertex] = m_vertices.size();
+        hash[vertex] = m_vertices.size(); //o valor do hash é a ordem que esse vertex foi lido
         // Add this vertex
-        m_vertices.push_back(vertex);
+        m_vertices.push_back(vertex); //o vértice é adicionado ao arranjo de vértices, se ainda não existir
       }
-
-      m_indices.push_back(hash[vertex]);
+      //no arranjo de índices, podem haver posições duplicadas, pois os vértices podem ser compartilhados por triangulos diferentes
+      m_indices.push_back(hash[vertex]); //o valor do hash deste vértice e adicionado ao arranjo de indices
     }
   }
 }
-
+//função para centralizar e aplicar escala,
+//modificando vertices carregados do .obj para que a geometria caiba no volume de visão do pipeline gráfico,
+// que é o cubo de tamanho 2×2×2 centralizado em (0,0,0)
 void OpenGLWindow::standardize() {
   // Center to origin and normalize largest bound to [-1, 1]
 
-  // Get bounds
+  // achar maiores e menores valores de x,y,z
   glm::vec3 max(std::numeric_limits<float>::lowest());
   glm::vec3 min(std::numeric_limits<float>::max());
   for (const auto& vertex : m_vertices) {
@@ -139,28 +144,28 @@ void OpenGLWindow::standardize() {
     min.z = std::min(min.z, vertex.position.z);
   }
 
-  // Center and scale
-  const auto center{(min + max) / 2.0f};
-  const auto scaling{2.0f / glm::length(max - min)};
+  
+  const auto center{(min + max) / 2.0f}; // calculo do centro da caixa
+  const auto scaling{2.0f / glm::length(max - min)}; //calculo do fator de escala, de forma que a maior dimensão da caixa tenha comprimento 2
   for (auto& vertex : m_vertices) {
-    vertex.position = (vertex.position - center) * scaling;
+    vertex.position = (vertex.position - center) * scaling; //centralizar modelo na origem e aplicar escala
   }
 }
 
 void OpenGLWindow::paintGL() {
-  // Animate angle by 15 degrees per second
+  // angulo (em radianos) é incrementado em 15 graus por segundo
   const float deltaTime{static_cast<float>(getDeltaTime())};
   m_angle = glm::wrapAngle(m_angle + glm::radians(15.0f) * deltaTime);
 
   // Clear color buffer and depth buffer
   abcg::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+  //código praticamente padrão daqui em diante
   abcg::glViewport(0, 0, m_viewportWidth, m_viewportHeight);
+  
+  abcg::glUseProgram(m_program); //usar shaders
+  abcg::glBindVertexArray(m_VAO); //usar vao
 
-  abcg::glUseProgram(m_program);
-  abcg::glBindVertexArray(m_VAO);
-
-  // Update uniform variable
+  // atualizar variavel do angulo para dentro do vertex shader
   const GLint angleLoc{abcg::glGetUniformLocation(m_program, "angle")};
   abcg::glUniform1f(angleLoc, m_angle);
 
@@ -185,7 +190,7 @@ void OpenGLWindow::paintUI() {
     {
       // Slider will fill the space of the window
       ImGui::PushItemWidth(m_viewportWidth - 25);
-
+      //definição do slider que controla o numero de triangulos que será renderizado
       static int n{m_verticesToDraw / 3};
       ImGui::SliderInt("", &n, 0, m_indices.size() / 3, "%d triangles");
       m_verticesToDraw = n * 3;
@@ -202,7 +207,7 @@ void OpenGLWindow::paintUI() {
     ImGui::SetNextWindowPos(ImVec2(m_viewportWidth - widgetSize.x - 5, 5));
     ImGui::SetNextWindowSize(widgetSize);
     ImGui::Begin("Widget window", nullptr, ImGuiWindowFlags_NoDecoration);
-
+    //checkbozx para ativação de Face culling (descarte das faces não viradas para a tela)
     static bool faceCulling{};
     ImGui::Checkbox("Back-face culling", &faceCulling);
 
@@ -229,7 +234,8 @@ void OpenGLWindow::paintUI() {
         ImGui::EndCombo();
       }
       ImGui::PopItemWidth();
-
+      //de acordo com o escolhido na combo box, define se a orientação dos indices é horario ou anti horario
+      //na pratica, isso vira o objeto do avesso, pois inverte o que é frente e o que é costas dos triangulos
       if (currentIndex == 0) {
         abcg::glFrontFace(GL_CW);
       } else {
