@@ -33,7 +33,7 @@ void OpenGLWindow::initializeGL() {
                                     getAssetsPath() + "loadmodel.frag");
 
   // Load model
-  loadModelFromFile(getAssetsPath() + "box.obj"); //carregamento do .obj
+  loadModelFromFile(getAssetsPath() + "dice.obj"); //carregamento do .obj
   standardize();
 
   m_verticesToDraw = m_indices.size();
@@ -171,7 +171,7 @@ void OpenGLWindow::paintGL() {
   }
   //debug
   //fmt::print("angle: {} {} {}\n", m_angle[0], m_angle[1], m_angle[2]);
-  fmt::print("myTime: {} delta: {}\n", myTime, deltaTime);
+  //fmt::print("myTime: {} delta: {}\n", myTime, deltaTime);
 
   // Clear color buffer and depth buffer
   abcg::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -241,7 +241,7 @@ void OpenGLWindow::paintUI() {
     // CW/CCW combo box
     {
       static std::size_t currentIndex{};
-      const std::vector<std::string> comboItems{"CCW", "CW"};
+      const std::vector<std::string> comboItems{"CW", "CCW"};
 
       ImGui::PushItemWidth(70);
       if (ImGui::BeginCombo("Front face",
@@ -258,9 +258,9 @@ void OpenGLWindow::paintUI() {
       //de acordo com o escolhido na combo box, define se a orientação dos indices é horario ou anti horario
       //na pratica, isso vira o objeto do avesso, pois inverte o que é frente e o que é costas dos triangulos
       if (currentIndex == 0) {
-        abcg::glFrontFace(GL_CCW);
-      } else {
         abcg::glFrontFace(GL_CW);
+      } else {
+        abcg::glFrontFace(GL_CCW);
       }
     }
 
