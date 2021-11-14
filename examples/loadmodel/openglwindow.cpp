@@ -58,18 +58,31 @@ void OpenGLWindow::initializeGL() {
 
   // Bind vertex attributes to current VAO
   abcg::glBindVertexArray(m_VAO);
-
   abcg::glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-  GLint positionAttribute{abcg::glGetAttribLocation(m_program, "inPosition")}; //layout(location = _)
 
-  abcg::glEnableVertexAttribArray(positionAttribute);
-  abcg::glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, GL_FALSE,
-                              sizeof(Vertex), nullptr);
-  abcg::glBindBuffer(GL_ARRAY_BUFFER, 0);
+  // Bind vertex attributes
+  GLint positionAttribute{abcg::glGetAttribLocation(m_program, "inPosition")}; //layout(location = _)
+  if (positionAttribute >= 0) {
+    abcg::glEnableVertexAttribArray(positionAttribute);
+    abcg::glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, GL_FALSE,
+                                sizeof(Vertex), nullptr);
+  }
+
+  const GLint colorAttribute{abcg::glGetAttribLocation(m_program, "inColor")};
+  if (colorAttribute >= 0) {
+    abcg::glEnableVertexAttribArray(colorAttribute);
+    GLsizei offset{sizeof(glm::vec3)};
+    abcg::glVertexAttribPointer(colorAttribute, 3, GL_FLOAT, GL_FALSE,
+                                sizeof(Vertex),
+                                reinterpret_cast<void*>(offset));
+  }
+
+  
 
   abcg::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
 
   // End of binding to current VAO
+  abcg::glBindBuffer(GL_ARRAY_BUFFER, 0);
   abcg::glBindVertexArray(0);
 }
 
@@ -102,7 +115,7 @@ void OpenGLWindow::loadModelFromFile(std::string path) {
   // ler todos os triangulos e vertices
   for (const auto& shape : shapes) {
     // pra cada um dos indices
-    for (const auto offset : iter::range(shape.mesh.indices.size())) { //40704
+    for (const auto offset : iter::range(shape.mesh.indices.size())) { //40704 shapes
       // Access to vertex
       const tinyobj::index_t index{shape.mesh.indices.at(offset)};
 
@@ -111,13 +124,13 @@ void OpenGLWindow::loadModelFromFile(std::string path) {
       const float vx{attrib.vertices.at(startIndex + 0)};
       const float vy{attrib.vertices.at(startIndex + 1)};
       const float vz{attrib.vertices.at(startIndex + 2)};
-
+      
       // const auto cor = shape.mesh.material_ids.at(0);
       // fmt::print("color: {}\n", cor);
 
       Vertex vertex{};
       vertex.position = {vx, vy, vz}; //a chave do vertex é sua posição
-      //vertex.color = {1.0f, 1.0f, 1.0f};
+      vertex.color = {1.0f, 1.0f, 1.0f};
       // fmt::print("position x: {} color r: {}\n", vertex.position.x, vertex.color.r);
 
       // If hash doesn't contain this vertex
@@ -188,8 +201,8 @@ void OpenGLWindow::paintGL() {
   abcg::glBindVertexArray(m_VAO); //usar vao
 
   //atualizar cor do vertice
-  const GLint m_colorLoc = abcg::glGetUniformLocation(m_program, "color");  
-  abcg::glUniform3f(m_colorLoc, 1,1,1);
+  // const GLint m_colorLoc = abcg::glGetUniformLocation(m_program, "color");  
+  // abcg::glUniform3f(m_colorLoc, 1,1,1);
   //fmt::print("m_vertices[0].position.x: {} color r: {}\n",m_vertices[0].position.x, m_vertices[0].color.r);
 
   // atualizar variavel do angulo para dentro do vertex shader
