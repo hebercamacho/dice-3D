@@ -34,7 +34,7 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   glm::vec3 m_angle{0.0f, 0.0f, 0.0f}; // ângulo de rotação que será enviado à variável uniforme do vertex shader.
   int m_verticesToDraw{}; //quantidade de vértices do VBO que será processada pela função de renderização, glDrawElements
   glm::ivec3 m_rotation{0,0,0}; // nos ajuda a decidir qual a direção da rotação
-  float deltaTime{0.0f};
+  float myTime{0.0f};
 
   std::vector<Vertex> m_vertices; //arranjo de vértices lido do arquivo OBJ que será enviado ao VBO
   std::vector<GLuint> m_indices; //arranjo de indices lido do arquivo OBJ que será enviado ao EBO

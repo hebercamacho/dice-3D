@@ -153,19 +153,26 @@ void OpenGLWindow::standardize() {
 }
 
 void OpenGLWindow::paintGL() {
+  const float deltaTime{static_cast<float>(getDeltaTime())};
   // angulo (em radianos) é incrementado se houver alguma rotação ativa
   if(m_rotation[0] || m_rotation[1] ||m_rotation[2]){
-    deltaTime = deltaTime + 0.0000001f;
+    //ajuste de velocidade de rotação, necessário para conseguirmos pausar
+    myTime = deltaTime;
+    
+    //incrementa ângulo de {x,y,z} se rotação em torno do eixo {x,y,z} estiver ativa
     if(m_rotation[0])
-      m_angle[0] = glm::wrapAngle(m_angle[0] + glm::radians(45.0f) * deltaTime);
+      m_angle[0] = glm::wrapAngle(m_angle[0] + glm::radians(45.0f) * myTime);
 
     if(m_rotation[1])
-      m_angle[1] = glm::wrapAngle(m_angle[1] + glm::radians(45.0f) * deltaTime);
+      m_angle[1] = glm::wrapAngle(m_angle[1] + glm::radians(45.0f) * myTime);
 
     if(m_rotation[2])
-      m_angle[2] = glm::wrapAngle(m_angle[2] + glm::radians(45.0f) * deltaTime);
+      m_angle[2] = glm::wrapAngle(m_angle[2] + glm::radians(45.0f) * myTime);
   }
-  fmt::print("angle: {} {} {}\n", m_angle[0], m_angle[1], m_angle[2]);
+  //debug
+  //fmt::print("angle: {} {} {}\n", m_angle[0], m_angle[1], m_angle[2]);
+  fmt::print("myTime: {} delta: {}\n", myTime, deltaTime);
+
   // Clear color buffer and depth buffer
   abcg::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   //código praticamente padrão daqui em diante
