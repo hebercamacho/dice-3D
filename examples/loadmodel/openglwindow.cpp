@@ -104,33 +104,45 @@ void OpenGLWindow::loadModelFromFile(std::string path) {
   }
 
   const auto& attrib{reader.GetAttrib()}; //conjunto de vertices
-  const auto& shapes{reader.GetShapes()}; //conjunto de malhas
+  const auto& shapes{reader.GetShapes()}; //conjunto de objetos (só tem 1)
 
   m_vertices.clear();
   m_indices.clear();
 
   // A key:value map with key=Vertex and value=index
   std::unordered_map<Vertex, GLuint> hash{};
-
+  // fmt::print("shapes.at(0).mesh.material_ids.size(): {}\n", shapes.at(0).mesh.material_ids.size());
+  // fmt::print("shapes.at(0).points.indices.size(): {}\n", shapes.at(0).mesh.indices.size());
+  // fmt::print("shapes.at(0).mesh.num_face_vertices.size(): {}\n", shapes.at(0).mesh.num_face_vertices.size());
+  // fmt::print("shapes.at(0).mesh.tags.size(): {}\n", shapes.at(0).mesh.tags.size());
   // ler todos os triangulos e vertices
-  for (const auto& shape : shapes) {
+  for (const auto& shape : shapes) { 
     // pra cada um dos indices
-    for (const auto offset : iter::range(shape.mesh.indices.size())) { //40704 shapes
+    for (const auto offset : iter::range(shape.mesh.indices.size())) { //122112 indices = numero de triangulos * 3
       // Access to vertex
-      const tinyobj::index_t index{shape.mesh.indices.at(offset)};
+      const tinyobj::index_t index{shape.mesh.indices.at(offset)}; //offset vai ser de 0 a 122112, index vai acessar cada vertice nessas posições offset
 
       // Vertex position
-      const int startIndex{3 * index.vertex_index};
+      const int startIndex{3 * index.vertex_index}; //startIndex vai encontrar o indice exato de cada vertice
       const float vx{attrib.vertices.at(startIndex + 0)};
       const float vy{attrib.vertices.at(startIndex + 1)};
       const float vz{attrib.vertices.at(startIndex + 2)};
+
+      //são 40704 triangulos, dos quais 27264 brancos.
+      //se fizermos offset / 3 teremos o indice do triangulos?
       
-      // const auto cor = shape.mesh.material_ids.at(0);
-      // fmt::print("color: {}\n", cor);
+      const auto material_id = shape.mesh.material_ids.at(offset/3);
+      // if(material_id !=1)
+      // fmt::print("material_id do triangulo: {}\n", (float)material_id);
+
+      // fmt::print("offset: {}\n", offset);
+      // fmt::print("shape.mesh.indices.size(): {}\n", shape.mesh.indices.size());
+      // fmt::print("index.vertex_index: {}\n", index.vertex_index);
+      // fmt::print("startIndex: {}\n", startIndex);
 
       Vertex vertex{};
       vertex.position = {vx, vy, vz}; //a chave do vertex é sua posição
-      vertex.color = {1.0f, 1.0f, 1.0f};
+      vertex.color = {(float)material_id, (float)material_id, (float)material_id};
       // fmt::print("position x: {} color r: {}\n", vertex.position.x, vertex.color.r);
 
       // If hash doesn't contain this vertex
