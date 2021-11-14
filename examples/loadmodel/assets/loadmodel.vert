@@ -2,9 +2,12 @@
 
 layout(location = 0) in vec3 inPosition; //posição (x,y,z) do vértice
 
+uniform vec3 color;
 uniform float rotationX;
 uniform float rotationY;
 uniform float rotationZ;
+
+out vec4 fragColor;
 
 void main() {
 
@@ -29,6 +32,6 @@ void main() {
                             newPosition.z);
   }
   
-  gl_Position = vec4(newPosition, 2.0);
-  
+  gl_Position = vec4(newPosition, 1.0);
+  fragColor = vec4(color, 1.0f);
 }

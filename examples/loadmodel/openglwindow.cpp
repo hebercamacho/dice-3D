@@ -60,7 +60,8 @@ void OpenGLWindow::initializeGL() {
   abcg::glBindVertexArray(m_VAO);
 
   abcg::glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-  GLint positionAttribute{abcg::glGetAttribLocation(m_program, "inPosition")};
+  GLint positionAttribute{abcg::glGetAttribLocation(m_program, "inPosition")}; //layout(location = _)
+
   abcg::glEnableVertexAttribArray(positionAttribute);
   abcg::glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, GL_FALSE,
                               sizeof(Vertex), nullptr);
@@ -101,7 +102,7 @@ void OpenGLWindow::loadModelFromFile(std::string path) {
   // ler todos os triangulos e vertices
   for (const auto& shape : shapes) {
     // pra cada um dos indices
-    for (const auto offset : iter::range(shape.mesh.indices.size())) {
+    for (const auto offset : iter::range(shape.mesh.indices.size())) { //40704
       // Access to vertex
       const tinyobj::index_t index{shape.mesh.indices.at(offset)};
 
@@ -111,9 +112,14 @@ void OpenGLWindow::loadModelFromFile(std::string path) {
       const float vy{attrib.vertices.at(startIndex + 1)};
       const float vz{attrib.vertices.at(startIndex + 2)};
 
+      // const auto cor = shape.mesh.material_ids.at(0);
+      // fmt::print("color: {}\n", cor);
+
       Vertex vertex{};
       vertex.position = {vx, vy, vz}; //a chave do vertex é sua posição
-    
+      //vertex.color = {1.0f, 1.0f, 1.0f};
+      // fmt::print("position x: {} color r: {}\n", vertex.position.x, vertex.color.r);
+
       // If hash doesn't contain this vertex
       if (hash.count(vertex) == 0) {
         // Add this index (size of m_vertices)
@@ -122,7 +128,7 @@ void OpenGLWindow::loadModelFromFile(std::string path) {
         m_vertices.push_back(vertex); //o vértice é adicionado ao arranjo de vértices, se ainda não existir
       }
       //no arranjo de índices, podem haver posições duplicadas, pois os vértices podem ser compartilhados por triangulos diferentes
-      m_indices.push_back(hash[vertex]); //o valor do hash deste vértice e adicionado ao arranjo de indices
+      m_indices.push_back(hash[vertex]); //o valor do hash deste vértice (suua ordem) é adicionado ao arranjo de indices
     }
   }
 }
@@ -181,8 +187,12 @@ void OpenGLWindow::paintGL() {
   abcg::glUseProgram(m_program); //usar shaders
   abcg::glBindVertexArray(m_VAO); //usar vao
 
-  // atualizar variavel do angulo para dentro do vertex shader
+  //atualizar cor do vertice
+  const GLint m_colorLoc = abcg::glGetUniformLocation(m_program, "color");  
+  abcg::glUniform3f(m_colorLoc, 1,1,1);
+  //fmt::print("m_vertices[0].position.x: {} color r: {}\n",m_vertices[0].position.x, m_vertices[0].color.r);
 
+  // atualizar variavel do angulo para dentro do vertex shader
   const GLint rotationXLoc{abcg::glGetUniformLocation(m_program, "rotationX")};
   abcg::glUniform1f(rotationXLoc, m_angle[0]);
   const GLint rotationYLoc{abcg::glGetUniformLocation(m_program, "rotationY")};

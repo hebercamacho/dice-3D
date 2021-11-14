@@ -8,6 +8,7 @@
 //atributos que definem um vértice: posição 3D e operador == pra verificar se um vértice é igual a outro
 struct Vertex {
   glm::vec3 position;
+  //glm::vec3 color;
 
   bool operator==(const Vertex& other) const {
     return position == other.position;
