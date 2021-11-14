@@ -2,13 +2,33 @@
 
 layout(location = 0) in vec3 inPosition; //posição (x,y,z) do vértice
 
-uniform float angle;
+uniform float rotationX;
+uniform float rotationY;
+uniform float rotationZ;
 
 void main() {
-  float sinAngle = sin(angle);
-  float cosAngle = cos(angle);
- //rotação em torno do eixo y (por isso y não muda)
-  gl_Position = vec4( inPosition.x * cosAngle + inPosition.z * sinAngle,
-                      inPosition.y,
-                      inPosition.z * cosAngle - inPosition.x * sinAngle, 1.0);
+
+  vec3 newPosition = inPosition;
+  if(rotationX > 0){
+    //rotação em torno do eixo x
+    newPosition = vec3( newPosition.x,
+                    newPosition.y * cos(rotationX) - newPosition.z * sin(rotationX),
+                    newPosition.z * cos(rotationX) + newPosition.y * sin(rotationX));
+  }
+  
+  if(rotationY > 0){
+    //rotação em torno do eixo y
+    newPosition = vec3( newPosition.x * cos(rotationY) + newPosition.z * sin(rotationY),
+                            newPosition.y,
+                            newPosition.z * cos(rotationY) - newPosition.x * sin(rotationY));
+  }
+  if(rotationZ > 0){
+    //rotação em torno do eixo z
+    newPosition = vec3( newPosition.x * cos(rotationZ) - newPosition.y * sin(rotationZ),
+                            newPosition.y * cos(rotationZ) + newPosition.x * sin(rotationZ),
+                            newPosition.z);
+  }
+  
+  gl_Position = vec4(newPosition, 1.0);
+  
 }

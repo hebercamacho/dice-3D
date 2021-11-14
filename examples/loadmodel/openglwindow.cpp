@@ -33,7 +33,7 @@ void OpenGLWindow::initializeGL() {
                                     getAssetsPath() + "loadmodel.frag");
 
   // Load model
-  loadModelFromFile(getAssetsPath() + "teapot.obj"); //carregamento do .obj
+  loadModelFromFile(getAssetsPath() + "box.obj"); //carregamento do .obj
   standardize();
 
   m_verticesToDraw = m_indices.size();
@@ -153,10 +153,19 @@ void OpenGLWindow::standardize() {
 }
 
 void OpenGLWindow::paintGL() {
-  // angulo (em radianos) é incrementado em 15 graus por segundo
-  const float deltaTime{static_cast<float>(getDeltaTime())};
-  m_angle = glm::wrapAngle(m_angle + glm::radians(15.0f) * deltaTime);
+  // angulo (em radianos) é incrementado se houver alguma rotação ativa
+  if(m_rotation[0] || m_rotation[1] ||m_rotation[2]){
+    deltaTime = deltaTime + 0.0000001f;
+    if(m_rotation[0])
+      m_angle[0] = glm::wrapAngle(m_angle[0] + glm::radians(45.0f) * deltaTime);
 
+    if(m_rotation[1])
+      m_angle[1] = glm::wrapAngle(m_angle[1] + glm::radians(45.0f) * deltaTime);
+
+    if(m_rotation[2])
+      m_angle[2] = glm::wrapAngle(m_angle[2] + glm::radians(45.0f) * deltaTime);
+  }
+  fmt::print("angle: {} {} {}\n", m_angle[0], m_angle[1], m_angle[2]);
   // Clear color buffer and depth buffer
   abcg::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   //código praticamente padrão daqui em diante
@@ -166,8 +175,13 @@ void OpenGLWindow::paintGL() {
   abcg::glBindVertexArray(m_VAO); //usar vao
 
   // atualizar variavel do angulo para dentro do vertex shader
-  const GLint angleLoc{abcg::glGetUniformLocation(m_program, "angle")};
-  abcg::glUniform1f(angleLoc, m_angle);
+
+  const GLint rotationXLoc{abcg::glGetUniformLocation(m_program, "rotationX")};
+  abcg::glUniform1f(rotationXLoc, m_angle[0]);
+  const GLint rotationYLoc{abcg::glGetUniformLocation(m_program, "rotationY")};
+  abcg::glUniform1f(rotationYLoc, m_angle[1]);
+  const GLint rotationZLoc{abcg::glGetUniformLocation(m_program, "rotationZ")};
+  abcg::glUniform1f(rotationZLoc, m_angle[2]);
 
   // Draw triangles
   abcg::glDrawElements(GL_TRIANGLES, m_verticesToDraw, GL_UNSIGNED_INT,
@@ -203,11 +217,11 @@ void OpenGLWindow::paintUI() {
 
   // Create a window for the other widgets
   {
-    const auto widgetSize{ImVec2(172, 62)};
+    const auto widgetSize{ImVec2(172, 212)};
     ImGui::SetNextWindowPos(ImVec2(m_viewportWidth - widgetSize.x - 5, 5));
     ImGui::SetNextWindowSize(widgetSize);
     ImGui::Begin("Widget window", nullptr, ImGuiWindowFlags_NoDecoration);
-    //checkbozx para ativação de Face culling (descarte das faces não viradas para a tela)
+    //checkbox para ativação de Face culling (descarte das faces não viradas para a tela)
     static bool faceCulling{};
     ImGui::Checkbox("Back-face culling", &faceCulling);
 
@@ -220,7 +234,7 @@ void OpenGLWindow::paintUI() {
     // CW/CCW combo box
     {
       static std::size_t currentIndex{};
-      const std::vector<std::string> comboItems{"CW", "CCW"};
+      const std::vector<std::string> comboItems{"CCW", "CW"};
 
       ImGui::PushItemWidth(70);
       if (ImGui::BeginCombo("Front face",
@@ -237,10 +251,23 @@ void OpenGLWindow::paintUI() {
       //de acordo com o escolhido na combo box, define se a orientação dos indices é horario ou anti horario
       //na pratica, isso vira o objeto do avesso, pois inverte o que é frente e o que é costas dos triangulos
       if (currentIndex == 0) {
-        abcg::glFrontFace(GL_CW);
-      } else {
         abcg::glFrontFace(GL_CCW);
+      } else {
+        abcg::glFrontFace(GL_CW);
       }
+    }
+
+    {
+      //checkbox para decisão de qual direção rotacionar
+      static bool rotateX{}, rotateY{}, rotateZ{};
+      ImGui::Checkbox("Rotate X", &rotateX);
+      ImGui::Checkbox("Rotate Y", &rotateY);
+      ImGui::Checkbox("Rotate Z", &rotateZ);
+
+      m_rotation[0] = rotateX;
+      m_rotation[1] = rotateY;
+      m_rotation[2] = rotateZ;
+      
     }
 
     ImGui::End();
