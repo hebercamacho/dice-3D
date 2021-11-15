@@ -1,14 +1,7 @@
-ABCg
-======
+# minesweeper-cg
+Projeto de Computação Gráfica 2021.3
 
-Development framework accompanying the course MCTA008-17 Computer Graphics at [UFABC](https://www.ufabc.edu.br/).
+[Clique aqui para jogar](https://hebercamacho.github.io/minesweeper-cg/minesweeper)
 
-----
-
-### Credits
-
-Developed by Harlen Batagelo.
-
-### License
-
-ABCg is licensed under the MIT License. See [LICENSE](https://github.com/hbatagelo/abcg/blob/main/LICENSE) for more information.
+# Desenvolvedores
+Héber Camacho Desterro 11069416

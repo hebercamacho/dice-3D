@@ -29,8 +29,8 @@ void OpenGLWindow::initializeGL() {
   abcg::glEnable(GL_DEPTH_TEST); //descartar fragmentos dependendo da profundidade
 
   // Create program
-  m_program = createProgramFromFile(getAssetsPath() + "loadmodel.vert",
-                                    getAssetsPath() + "loadmodel.frag");
+  m_program = createProgramFromFile(getAssetsPath() + "dice.vert",
+                                    getAssetsPath() + "dice.frag");
 
   // Load model
   loadModelFromFile(getAssetsPath() + "dice.obj"); //carregamento do .obj
