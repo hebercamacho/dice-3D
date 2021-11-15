@@ -3,7 +3,7 @@
 layout(location = 0) in vec3 inPosition; //posição (x,y,z) do vértice
 layout(location = 1) in vec3 inColor;
 
-// uniform vec3 color;
+uniform vec3 translation;
 uniform float rotationX;
 uniform float rotationY;
 uniform float rotationZ;
@@ -33,6 +33,6 @@ void main() {
                             newPosition.z);
   }
   
-  gl_Position = vec4(newPosition, 1.0f);
-  fragColor = vec4(inColor, 1.0f);
+  gl_Position = vec4(newPosition + translation, 2.0f);
+  fragColor = vec4(inColor, 3.0f);
 }

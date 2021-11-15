@@ -205,9 +205,13 @@ void OpenGLWindow::paintGL() {
   //fmt::print("myTime: {} delta: {}\n", myTime, deltaTime);
 
   //Dado sendo girado
+  const int maxQuadros = 600;
   if(dadoGirando){
     quadros++;
-    if(quadros > 600){
+    translation.x += (2.0f / maxQuadros);
+    translation.y = std::pow(translation.x, 2.0f) * (-1);
+    fmt::print("q: {} translation: {} {}\n",quadros, translation.x, translation.y);
+    if(quadros > maxQuadros){
       jogarDado();
     }
   }
@@ -251,6 +255,8 @@ void OpenGLWindow::paintGL() {
   abcg::glUniform1f(rotationYLoc, m_angle.y);
   const GLint rotationZLoc{abcg::glGetUniformLocation(m_program, "rotationZ")};
   abcg::glUniform1f(rotationZLoc, m_angle.z);
+  const GLint translationLoc{abcg::glGetUniformLocation(m_program, "translation")};
+  abcg::glUniform3fv(translationLoc, 1, &translation.x);
 
   // Draw triangles
   abcg::glDrawElements(GL_TRIANGLES, m_verticesToDraw, GL_UNSIGNED_INT,
@@ -265,7 +271,7 @@ void OpenGLWindow::paintUI() {
   //Botão jogar dado
   {
     ImGui::SetNextWindowPos(ImVec2(5,15));
-    ImGui::SetNextWindowSize(ImVec2(100, 200));
+    ImGui::SetNextWindowSize(ImVec2(70, 40));
     ImGui::Begin("Button window", nullptr, ImGuiWindowFlags_NoDecoration);
     ImGui::PushItemWidth(200);
 
@@ -398,6 +404,8 @@ void OpenGLWindow::jogarDado() {
   quadros = 0;
   dadoGirando = false;
   m_rotation = {0,0,0};
+  //translation = {0.0f,0.0f,0.0f};
+  fmt::print("translation final: {} {}\n", translation.x, translation.y);
 
   std::uniform_int_distribution<int> idist(1,6);
   m_angle = glm::radians(angulosRetos[idist(m_randomEngine)]);

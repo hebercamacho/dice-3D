@@ -11,9 +11,9 @@ void main() {
   
   //gl_FrontFacing é true se esta é a face da frente
   if (gl_FrontFacing) {
-    outColor = vec4(fragColor.r*i,fragColor.g*i,fragColor.b*i,3.0f); //por fora, tom entre branco e cinza
+    outColor = vec4(fragColor.r*i,fragColor.g*i,fragColor.b*i,1.0f); //por fora, tom entre branco e cinza
     // outColor = fragColor;
   } else {
-    outColor = vec4(0.5f, 0.5f, 0.5f, 3.0f); //por dentro, tom de cinza escuro
+    outColor = vec4(0.5f, 0.5f, 0.5f, 1.0f); //por dentro, tom de cinza escuro
   }
 }
