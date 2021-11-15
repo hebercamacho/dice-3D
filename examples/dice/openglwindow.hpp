@@ -35,6 +35,7 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   glm::vec3 m_angle{glm::radians(250.0f), glm::radians(345.0f), glm::radians(12.0f)}; // ângulo de rotação que será enviado à variável uniforme do vertex shader.
   int m_verticesToDraw{}; //quantidade de vértices do VBO que será processada pela função de renderização, glDrawElements
   glm::ivec3 m_rotation{0,0,0}; // nos ajuda a decidir qual a direção da rotação
+  glm::vec3 velocidadeAngular{0.0f,0.0f,0.0f};
   float myTime{0.0f};
   std::array<glm::vec3, 7> angulosRetos{
     glm::vec3{0.0f,0.0f,0.0f}, //0 apenas pra manter o numero do dado igual ao numero do indice
@@ -51,9 +52,13 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   std::vector<Vertex> m_vertices; //arranjo de vértices lido do arquivo OBJ que será enviado ao VBO
   std::vector<GLuint> m_indices; //arranjo de indices lido do arquivo OBJ que será enviado ao EBO
 
+  bool dadoGirando = false;
+  int quadros=0;
+
   void loadModelFromFile(std::string path); //função para carregamento do arquivo OBJ
   void standardize(); //função para centralizar o modelo na origem e normalizar as coordenadas de todos os vértices no intervalo [-1,1]
   void jogarDado();
+  void giradinhaAleatoria();
 };
 
 #endif

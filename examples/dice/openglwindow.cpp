@@ -201,9 +201,36 @@ void OpenGLWindow::paintGL() {
   //     m_angle.z = glm::wrapAngle(m_angle.z + glm::radians(45.0f) * myTime);
   // }
   //debug
-  fmt::print("angle: {} {} {}\n", m_angle.x, m_angle.y, m_angle.z);
+  //fmt::print("angle: {} {} {}\n", m_angle.x, m_angle.y, m_angle.z);
   //fmt::print("myTime: {} delta: {}\n", myTime, deltaTime);
 
+  //Dado sendo girado
+  if(dadoGirando){
+    quadros++;
+    if(quadros > 600){
+      jogarDado();
+    }
+  }
+  //quantos segundos se passaram desde a ultima atualização da tela
+  const float deltaTime{static_cast<float>(getDeltaTime())};
+  // angulo (em radianos) é incrementado se houver alguma rotação ativa
+  if(m_rotation.x || m_rotation.y ||m_rotation.z){
+    //ajuste de velocidade de rotação, necessário para conseguirmos pausar
+    myTime = deltaTime;
+    
+    //incrementa ângulo de {x,y,z} se rotação em torno do eixo {x,y,z} estiver ativa
+    if(m_rotation.x)
+      m_angle.x = glm::wrapAngle(m_angle.x + velocidadeAngular.x * myTime);
+
+    if(m_rotation.y)
+      m_angle.y = glm::wrapAngle(m_angle.y + velocidadeAngular.y * myTime);
+
+    if(m_rotation.z)
+      m_angle.z = glm::wrapAngle(m_angle.z + velocidadeAngular.z * myTime);
+  }
+  //fmt::print("angle: {} {} {}\n", m_angle.x, m_angle.y, m_angle.z);
+
+  
   // Clear color buffer and depth buffer
   abcg::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   //código praticamente padrão daqui em diante
@@ -235,49 +262,53 @@ void OpenGLWindow::paintGL() {
 
 void OpenGLWindow::paintUI() {
   abcg::OpenGLWindow::paintUI();
-
-  // Create window for slider
+  //Botão jogar dado
   {
-    ImGui::SetNextWindowPos(ImVec2(5, m_viewportHeight - 150));
-    ImGui::SetNextWindowSize(ImVec2(m_viewportWidth - 10, -1));
-    ImGui::Begin("Slider window", nullptr, ImGuiWindowFlags_NoDecoration);
+    ImGui::SetNextWindowPos(ImVec2(5,15));
+    ImGui::SetNextWindowSize(ImVec2(100, 200));
+    ImGui::Begin("Button window", nullptr, ImGuiWindowFlags_NoDecoration);
+    ImGui::PushItemWidth(200);
 
-    // Create a slider to control the number of rendered triangles
-    {
-      // Slider will fill the space of the window
-      ImGui::PushItemWidth(m_viewportWidth - 25);
-      //definição do slider que controla o numero de triangulos que será renderizado
-      // static int n{m_verticesToDraw / 3};
-      // ImGui::SliderInt("", &n, 0, m_indices.size() / 3, "%d triangles");
-      // m_verticesToDraw = n * 3;
-
-      //Sliders de angulo
-      static float n_X{glm::degrees(m_angle.x)}; 
-      static float n_Y{glm::degrees(m_angle.y)}; 
-      static float n_Z{glm::degrees(m_angle.z)};
-      ImGui::SliderFloat("X", &n_X, 0.0f, 360.0f, "%.3f degrees");
-      ImGui::SliderFloat("Y", &n_Y, 0.0f, 360.0f, "%.3f degrees");
-      ImGui::SliderFloat("Z", &n_Z, 0.0f, 360.0f, "%.3f degrees");
-      // m_angle.x = glm::radians(n_X);
-      // m_angle.y = glm::radians(n_Y);
-      // m_angle.z = glm::radians(n_Z);
-
-      ImGui::PopItemWidth();
+    if(ImGui::Button("Jogar!")){
+      giradinhaAleatoria();
+      dadoGirando = true;
     }
 
-    //Botão jogar dado
-    {
-      ImGui::PushItemWidth(200);
-
-      if(ImGui::Button("Jogar!")){
-        jogarDado();
-      }
-
-      ImGui::PopItemWidth();
-    }
-
+    ImGui::PopItemWidth();
     ImGui::End();
   }
+
+  // // Create window for slider
+  // {
+  //   ImGui::SetNextWindowPos(ImVec2(5, m_viewportHeight - 150));
+  //   ImGui::SetNextWindowSize(ImVec2(m_viewportWidth - 10, -1));
+  //   ImGui::Begin("Slider window", nullptr, ImGuiWindowFlags_NoDecoration);
+
+  //   // Create a slider to control the number of rendered triangles
+  //   {
+  //     // Slider will fill the space of the window
+  //     ImGui::PushItemWidth(m_viewportWidth - 25);
+  //     //definição do slider que controla o numero de triangulos que será renderizado
+  //     // static int n{m_verticesToDraw / 3};
+  //     // ImGui::SliderInt("", &n, 0, m_indices.size() / 3, "%d triangles");
+  //     // m_verticesToDraw = n * 3;
+
+  //     //Sliders de angulo
+  //     // static float n_X{glm::degrees(m_angle.x)}; 
+  //     // static float n_Y{glm::degrees(m_angle.y)}; 
+  //     // static float n_Z{glm::degrees(m_angle.z)};
+  //     // ImGui::SliderFloat("X", &n_X, 0.0f, 360.0f, "%.3f degrees");
+  //     // ImGui::SliderFloat("Y", &n_Y, 0.0f, 360.0f, "%.3f degrees");
+  //     // ImGui::SliderFloat("Z", &n_Z, 0.0f, 360.0f, "%.3f degrees");
+  //     // m_angle.x = glm::radians(n_X);
+  //     // m_angle.y = glm::radians(n_Y);
+  //     // m_angle.z = glm::radians(n_Z);
+
+  //     ImGui::PopItemWidth();
+  //   }
+
+  //   ImGui::End();
+  // }
 
   // Create a window for the other widgets
   // {
@@ -363,9 +394,32 @@ void OpenGLWindow::jogarDado() {
    // Start pseudo-random number generator
   auto seed{std::chrono::steady_clock::now().time_since_epoch().count()};
   m_randomEngine.seed(seed);
+  
+  quadros = 0;
+  dadoGirando = false;
+  m_rotation = {0,0,0};
 
-  std::uniform_int_distribution<int> dist(1,6);
-  m_angle = glm::radians(angulosRetos[dist(m_randomEngine)]);
+  std::uniform_int_distribution<int> idist(1,6);
+  m_angle = glm::radians(angulosRetos[idist(m_randomEngine)]);
+}
+
+void OpenGLWindow::giradinhaAleatoria(){
+  // Start pseudo-random number generator
+  auto seed{std::chrono::steady_clock::now().time_since_epoch().count()};
+  m_randomEngine.seed(seed);
+  
+  //distribuição aleatória entre 0 e 1, porque não precisamos girar em todos os eixos
+  std::uniform_int_distribution<int> idist(0,1);
+  // m_rotation = {idist(m_randomEngine), idist(m_randomEngine), idist(m_randomEngine)};
+  m_rotation = {1, 1, 1};
+  fmt::print("m_rotation.x: {} m_rotation.y: {} m_rotation.z: {}\n",m_rotation.x,m_rotation.y,m_rotation.z);
+
+  //distribuição aleatória de velocidade angular, para girar em cada eixo numa velocidade
+  std::uniform_real_distribution<float> fdist(180.0f,720.0f);
+  velocidadeAngular = {glm::radians(fdist(m_randomEngine))
+                      ,glm::radians(fdist(m_randomEngine))
+                      ,glm::radians(fdist(m_randomEngine))};
+  fmt::print("velocidadeAngular.x: {} velocidadeAngular.y: {} velocidadeAngular.z: {}\n",velocidadeAngular.x,velocidadeAngular.y,velocidadeAngular.z);
 }
 
 
