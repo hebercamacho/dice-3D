@@ -25,5 +25,5 @@ Héber Camacho Desterro RA: 11069416
 - [ ] Translação em formato de parábola
 - [ ] Trajetória aleatória
 - [ ] Efeito de "cair no chão", com uma face virada para cima
-- [ ] 
-- [ ] 
+- [ ] Girar somente 1 eixo por vez, para ficar com giro mais realista
+- [ ] Deslocar um pouco o ângulo onde ele para, e não zerar o eixo Z pois não precisa ficar reto se estamos olhando de cima

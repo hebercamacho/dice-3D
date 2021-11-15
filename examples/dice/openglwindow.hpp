@@ -54,13 +54,14 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   std::vector<GLuint> m_indices; //arranjo de indices lido do arquivo OBJ que será enviado ao EBO
 
   bool dadoGirando = false;
-  bool posicaoDado = false; //false = esquerda, true = direita
+  glm::bvec2 movimentoDado{true, true}; //false = irá pra esquerda/baixo, true = irá pra direita/cima
   int quadros=0;
 
   void loadModelFromFile(std::string path); //função para carregamento do arquivo OBJ
   void standardize(); //função para centralizar o modelo na origem e normalizar as coordenadas de todos os vértices no intervalo [-1,1]
   void jogarDado();
   void giradinhaAleatoria();
+  float direcaoAleatoria(int); //recebe uma das dimensões da janela e retorna uma fração aleatória do seu tamanho
 };
 
 #endif
