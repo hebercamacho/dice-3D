@@ -159,7 +159,7 @@ void OpenGLWindow::loadModelFromFile(std::string path) {
 }
 //função para centralizar e aplicar escala,
 //modificando vertices carregados do .obj para que a geometria caiba no volume de visão do pipeline gráfico,
-// que é o cubo de tamanho 2×2×2 centralizado em (0,0,0)
+// que é o cubo de tamanho 2×2×2 centralizado em (0,0,0).
 void OpenGLWindow::standardize() {
   // Center to origin and normalize largest bound to [-1, 1]
 
@@ -180,6 +180,11 @@ void OpenGLWindow::standardize() {
   const auto scaling{2.0f / glm::length(max - min)}; //calculo do fator de escala, de forma que a maior dimensão da caixa tenha comprimento 2
   for (auto& vertex : m_vertices) {
     vertex.position = (vertex.position - center) * scaling; //centralizar modelo na origem e aplicar escala
+    //ajuste para começar reto
+    // const auto ang = glm::radians(-10.0f);
+    // vertex.position = { vertex.position.x
+    //                   , vertex.position.y * cos(ang) - vertex.position.z * sin(ang)
+    //                   , vertex.position.z * cos(ang) + vertex.position.y * sin(ang)};
   }
 }
 
@@ -201,7 +206,7 @@ void OpenGLWindow::paintGL() {
       m_angle[2] = glm::wrapAngle(m_angle[2] + glm::radians(45.0f) * myTime);
   }
   //debug
-  //fmt::print("angle: {} {} {}\n", m_angle[0], m_angle[1], m_angle[2]);
+  fmt::print("angle: {} {} {}\n", m_angle[0], m_angle[1], m_angle[2]);
   //fmt::print("myTime: {} delta: {}\n", myTime, deltaTime);
 
   // Clear color buffer and depth buffer
@@ -237,25 +242,34 @@ void OpenGLWindow::paintUI() {
   abcg::OpenGLWindow::paintUI();
 
   // Create window for slider
-  {
-    ImGui::SetNextWindowPos(ImVec2(5, m_viewportHeight - 94));
-    ImGui::SetNextWindowSize(ImVec2(m_viewportWidth - 10, -1));
-    ImGui::Begin("Slider window", nullptr, ImGuiWindowFlags_NoDecoration);
+  // {
+  //   ImGui::SetNextWindowPos(ImVec2(5, m_viewportHeight - 150));
+  //   ImGui::SetNextWindowSize(ImVec2(m_viewportWidth - 10, -1));
+  //   ImGui::Begin("Slider window", nullptr, ImGuiWindowFlags_NoDecoration);
 
-    // Create a slider to control the number of rendered triangles
-    {
-      // Slider will fill the space of the window
-      ImGui::PushItemWidth(m_viewportWidth - 25);
-      //definição do slider que controla o numero de triangulos que será renderizado
-      static int n{m_verticesToDraw / 3};
-      ImGui::SliderInt("", &n, 0, m_indices.size() / 3, "%d triangles");
-      m_verticesToDraw = n * 3;
+  //   // Create a slider to control the number of rendered triangles
+  //   {
+  //     // Slider will fill the space of the window
+  //     ImGui::PushItemWidth(m_viewportWidth - 25);
+  //     //definição do slider que controla o numero de triangulos que será renderizado
+  //     // static int n{m_verticesToDraw / 3};
+  //     // ImGui::SliderInt("", &n, 0, m_indices.size() / 3, "%d triangles");
+  //     // m_verticesToDraw = n * 3;
 
-      ImGui::PopItemWidth();
-    }
+  //     //Sliders de angulo
+  //     // static float n_X{0.0f}; static float n_Y{0.0f}; static float n_Z{0.0f};
+  //     // ImGui::SliderFloat("X", &n_X, 0.0f, 360.0f, "%.3f degrees");
+  //     // ImGui::SliderFloat("Y", &n_Y, 0.0f, 360.0f, "%.3f degrees");
+  //     // ImGui::SliderFloat("Z", &n_Z, 0.0f, 360.0f, "%.3f degrees");
+  //     // m_angle.x = glm::radians(n_X);
+  //     // m_angle.y = glm::radians(n_Y);
+  //     // m_angle.z = glm::radians(n_Z);
 
-    ImGui::End();
-  }
+  //     ImGui::PopItemWidth();
+  //   }
+
+  //   ImGui::End();
+  // }
 
   // Create a window for the other widgets
   {

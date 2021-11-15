@@ -32,7 +32,7 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   int m_viewportWidth{};
   int m_viewportHeight{};
 
-  glm::vec3 m_angle{0.0f, 0.0f, 0.0f}; // ângulo de rotação que será enviado à variável uniforme do vertex shader.
+  glm::vec3 m_angle{glm::radians(250.0f), glm::radians(345.0f), glm::radians(12.0f)}; // ângulo de rotação que será enviado à variável uniforme do vertex shader.
   int m_verticesToDraw{}; //quantidade de vértices do VBO que será processada pela função de renderização, glDrawElements
   glm::ivec3 m_rotation{0,0,0}; // nos ajuda a decidir qual a direção da rotação
   float myTime{0.0f};
