@@ -5,7 +5,7 @@ O projeto consiste num jogo de dado em 3D, com a possibilidade de jogar várias 
 A visualização é fixa, como se estivéssemos olhando de cima para a superfície onde o dado está sendo jogado.
 Pressionando o botão "Jogar!", é possível jogar o dado novamente, sendo que cada jogada é independente da anterior, exceto pelo fato de que o dado irá partir da posição na qual parou na última vez.
 
-Para renderização, foram utilizadas as bibliotecas [Dear ImGui](https://github.com/ocornut/imgui) e [ABCg](https://github.com/hbatagelo/abcg).
+Para renderização, foi utilizada as biblioteca [ABCg](https://github.com/hbatagelo/abcg) e suas dependências.
 
 [Clique aqui para jogar](https://hebercamacho.github.io/dice-3D/dice)
 
