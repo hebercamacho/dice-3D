@@ -205,13 +205,48 @@ void OpenGLWindow::paintGL() {
   //fmt::print("myTime: {} delta: {}\n", myTime, deltaTime);
 
   //Dado sendo girado
-  const int maxQuadros = 600;
   if(dadoGirando){
+    const int maxQuadros = 1800; //número máximo de vezes que o quadro irá girar
+    const float deltaWidth = direcaoAleatoria(m_viewportWidth); //dividir a largura em varias frações pra irmos incrementando
+    const float deltaHeight = direcaoAleatoria(m_viewportHeight); //dividir a altura em varias frações pra irmos incrementando
+    //fmt::print("deltaWidth: {} deltaHeight: {}\n",deltaWidth, deltaHeight);
     quadros++;
-    if(posicaoDado) translation.x -= (2.0f / maxQuadros); //dado está na direita, mover pra esquerda
-    else translation.x += (2.0f / maxQuadros); //dado está na esquerda, mover pra direita
-    translation.y = std::pow(translation.x, 2.0f) * (-1);
-    fmt::print("q: {} translation: {} {}\n",quadros, translation.x, translation.y);
+    if(translation.x >= 1.0f) {
+      movimentoDado.x = false;
+      giradinhaAleatoria();
+    }
+    else if (translation.x <= -1.0f) {
+      movimentoDado.x = true;
+      giradinhaAleatoria();
+    }
+
+    if(translation.y >= 1.0f) {
+      movimentoDado.y = false;
+      giradinhaAleatoria();
+    }
+    else if (translation.y <= -1.0f) {
+      movimentoDado.y = true;
+      giradinhaAleatoria();
+    }
+    
+    //ir pra direita
+    if(movimentoDado.x) {
+      translation.x += deltaWidth; 
+    }
+    //ir pra esquerda
+    else{
+      translation.x -= deltaWidth;
+    }
+    //ir pra cima
+    if(movimentoDado.y) {
+      translation.y += deltaHeight; 
+    }
+    //ir pra baixo
+    else{
+      translation.y -= deltaHeight;
+    }
+
+    //fmt::print("q: {} translation: {} {}\n",quadros, translation.x, translation.y);
     if(quadros > maxQuadros){
       jogarDado();
     }
@@ -406,7 +441,6 @@ void OpenGLWindow::jogarDado() {
   dadoGirando = false;
   m_rotation = {0,0,0};
   //translation = {0.0f,0.0f,0.0f};
-  posicaoDado = !posicaoDado;
 
   fmt::print("translation final: {} {}\n", translation.x, translation.y);
 
@@ -423,16 +457,27 @@ void OpenGLWindow::giradinhaAleatoria(){
   std::uniform_int_distribution<int> idist(0,1);
   // m_rotation = {idist(m_randomEngine), idist(m_randomEngine), idist(m_randomEngine)};
   m_rotation = {1, 1, 1};
-  fmt::print("m_rotation.x: {} m_rotation.y: {} m_rotation.z: {}\n",m_rotation.x,m_rotation.y,m_rotation.z);
+  //fmt::print("m_rotation.x: {} m_rotation.y: {} m_rotation.z: {}\n",m_rotation.x,m_rotation.y,m_rotation.z);
 
   //distribuição aleatória de velocidade angular, para girar em cada eixo numa velocidade
-  std::uniform_real_distribution<float> fdist(180.0f,720.0f);
+  std::uniform_real_distribution<float> fdist(360.0f,720.0f);
   velocidadeAngular = {glm::radians(fdist(m_randomEngine))
                       ,glm::radians(fdist(m_randomEngine))
                       ,glm::radians(fdist(m_randomEngine))};
-  fmt::print("velocidadeAngular.x: {} velocidadeAngular.y: {} velocidadeAngular.z: {}\n",velocidadeAngular.x,velocidadeAngular.y,velocidadeAngular.z);
+  //fmt::print("velocidadeAngular.x: {} velocidadeAngular.y: {} velocidadeAngular.z: {}\n",velocidadeAngular.x,velocidadeAngular.y,velocidadeAngular.z);
 }
 
+float OpenGLWindow::direcaoAleatoria(int dimension){
+  // Start pseudo-random number generator
+  auto seed{std::chrono::steady_clock::now().time_since_epoch().count()};
+  m_randomEngine.seed(seed);
+
+  //distribuição aleatória de velocidade angular, para girar em cada eixo numa velocidade
+  std::uniform_real_distribution<float> fdist(1.0f,10.0f);
+  const float direcao = fdist(m_randomEngine) / dimension;
+  fmt::print("direcaoAleatoria: {}\n", direcao);
+  return direcao;
+}
 
 void OpenGLWindow::resizeGL(int width, int height) {
   m_viewportWidth = width;
