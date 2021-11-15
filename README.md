@@ -1,7 +1,7 @@
-# minesweeper-cg
+# Dice 3D
 Projeto de Computação Gráfica 2021.3
 
-[Clique aqui para jogar](https://hebercamacho.github.io/minesweeper-cg/minesweeper)
+[Clique aqui para jogar](https://hebercamacho.github.io/dice-3D/dice)
 
 # Desenvolvedores
-Héber Camacho Desterro 11069416
+Héber Camacho Desterro RA: 11069416
