@@ -180,11 +180,6 @@ void OpenGLWindow::standardize() {
   const auto scaling{2.0f / glm::length(max - min)}; //calculo do fator de escala, de forma que a maior dimensão da caixa tenha comprimento 2
   for (auto& vertex : m_vertices) {
     vertex.position = (vertex.position - center) * scaling; //centralizar modelo na origem e aplicar escala
-    //ajuste para começar reto
-    // const auto ang = glm::radians(-10.0f);
-    // vertex.position = { vertex.position.x
-    //                   , vertex.position.y * cos(ang) - vertex.position.z * sin(ang)
-    //                   , vertex.position.z * cos(ang) + vertex.position.y * sin(ang)};
   }
 }
 
@@ -274,83 +269,83 @@ void OpenGLWindow::paintUI() {
   }
 
   // Create a window for the other widgets
-  {
-    const auto widgetSize{ImVec2(172, 212)};
-    ImGui::SetNextWindowPos(ImVec2(m_viewportWidth - widgetSize.x - 5, 5));
-    ImGui::SetNextWindowSize(widgetSize);
-    ImGui::Begin("Widget window", nullptr, ImGuiWindowFlags_NoDecoration);
-    //checkbox para ativação de Face culling (descarte das faces não viradas para a tela)
-    static bool faceCulling{};
-    ImGui::Checkbox("Back-face culling", &faceCulling);
+  // {
+  //   const auto widgetSize{ImVec2(172, 212)};
+  //   ImGui::SetNextWindowPos(ImVec2(m_viewportWidth - widgetSize.x - 5, 5));
+  //   ImGui::SetNextWindowSize(widgetSize);
+  //   ImGui::Begin("Widget window", nullptr, ImGuiWindowFlags_NoDecoration);
+  //   //checkbox para ativação de Face culling (descarte das faces não viradas para a tela)
+  //   static bool faceCulling{};
+  //   ImGui::Checkbox("Back-face culling", &faceCulling);
 
-    if (faceCulling) {
-      abcg::glEnable(GL_CULL_FACE);
-    } else {
-      abcg::glDisable(GL_CULL_FACE);
-    }
+  //   if (faceCulling) {
+  //     abcg::glEnable(GL_CULL_FACE);
+  //   } else {
+      // abcg::glDisable(GL_CULL_FACE);
+  //   }
 
-    // CW/CCW combo box
-    {
-      static std::size_t currentIndex{};
-      const std::vector<std::string> comboItems{"CW", "CCW"};
+  //   // CW/CCW combo box
+  //   {
+  //     static std::size_t currentIndex{};
+  //     const std::vector<std::string> comboItems{"CW", "CCW"};
 
-      ImGui::PushItemWidth(70);
-      if (ImGui::BeginCombo("Front face",
-                            comboItems.at(currentIndex).c_str())) {
-        for (const auto index : iter::range(comboItems.size())) {
-          const bool isSelected{currentIndex == index};
-          if (ImGui::Selectable(comboItems.at(index).c_str(), isSelected))
-            currentIndex = index;
-          if (isSelected) ImGui::SetItemDefaultFocus();
-        }
-        ImGui::EndCombo();
-      }
-      ImGui::PopItemWidth();
-      //de acordo com o escolhido na combo box, define se a orientação dos indices é horario ou anti horario
-      //na pratica, isso vira o objeto do avesso, pois inverte o que é frente e o que é costas dos triangulos
-      if (currentIndex == 0) {
+  //     ImGui::PushItemWidth(70);
+  //     if (ImGui::BeginCombo("Front face",
+  //                           comboItems.at(currentIndex).c_str())) {
+  //       for (const auto index : iter::range(comboItems.size())) {
+  //         const bool isSelected{currentIndex == index};
+  //         if (ImGui::Selectable(comboItems.at(index).c_str(), isSelected))
+  //           currentIndex = index;
+  //         if (isSelected) ImGui::SetItemDefaultFocus();
+  //       }
+  //       ImGui::EndCombo();
+  //     }
+  //     ImGui::PopItemWidth();
+  //     //de acordo com o escolhido na combo box, define se a orientação dos indices é horario ou anti horario
+  //     //na pratica, isso vira o objeto do avesso, pois inverte o que é frente e o que é costas dos triangulos
+  //     if (currentIndex == 0) {
         abcg::glFrontFace(GL_CW);
-      } else {
-        abcg::glFrontFace(GL_CCW);
-      }
-    }
+  //     } else {
+  //       abcg::glFrontFace(GL_CCW);
+  //     }
+  //   }
 
-    // Número do dado box
-    {
-      static std::size_t currentIndex{};
-      const std::vector<std::string> comboItems{"1", "2", "3", "4", "5", "6"};
+  //   // Número do dado box
+  //   {
+  //     static std::size_t currentIndex{};
+  //     const std::vector<std::string> comboItems{"1", "2", "3", "4", "5", "6"};
 
-      ImGui::PushItemWidth(70);
-      if (ImGui::BeginCombo("Dice Face",
-                            comboItems.at(currentIndex).c_str())) {
-        for (const auto index : iter::range(comboItems.size())) {
-          const bool isSelected{currentIndex == index};
-          if (ImGui::Selectable(comboItems.at(index).c_str(), isSelected))
-            currentIndex = index;
-          if (isSelected) ImGui::SetItemDefaultFocus();
-        }
-        ImGui::EndCombo();
-      }
-      ImGui::PopItemWidth();
+  //     ImGui::PushItemWidth(70);
+  //     if (ImGui::BeginCombo("Dice Face",
+  //                           comboItems.at(currentIndex).c_str())) {
+  //       for (const auto index : iter::range(comboItems.size())) {
+  //         const bool isSelected{currentIndex == index};
+  //         if (ImGui::Selectable(comboItems.at(index).c_str(), isSelected))
+  //           currentIndex = index;
+  //         if (isSelected) ImGui::SetItemDefaultFocus();
+  //       }
+  //       ImGui::EndCombo();
+  //     }
+  //     ImGui::PopItemWidth();
       
-      m_angle = glm::radians(angulosRetos[currentIndex]);
-    }
+  //     m_angle = glm::radians(angulosRetos[currentIndex]);
+  //   }
 
-    {
-      //checkbox para decisão de qual direção rotacionar
-      static bool rotateX{}, rotateY{}, rotateZ{};
-      ImGui::Checkbox("Rotate X", &rotateX);
-      ImGui::Checkbox("Rotate Y", &rotateY);
-      ImGui::Checkbox("Rotate Z", &rotateZ);
+  //   {
+  //     //checkbox para decisão de qual direção rotacionar
+  //     static bool rotateX{}, rotateY{}, rotateZ{};
+  //     ImGui::Checkbox("Rotate X", &rotateX);
+  //     ImGui::Checkbox("Rotate Y", &rotateY);
+  //     ImGui::Checkbox("Rotate Z", &rotateZ);
 
-      m_rotation[0] = rotateX;
-      m_rotation[1] = rotateY;
-      m_rotation[2] = rotateZ;
+  //     m_rotation[0] = rotateX;
+  //     m_rotation[1] = rotateY;
+  //     m_rotation[2] = rotateZ;
       
-    }
+  //   }
 
-    ImGui::End();
-  }
+  //   ImGui::End();
+  // }
 }
 
 void OpenGLWindow::resizeGL(int width, int height) {
