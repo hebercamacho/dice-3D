@@ -184,24 +184,24 @@ void OpenGLWindow::standardize() {
 }
 
 void OpenGLWindow::paintGL() {
-  const float deltaTime{static_cast<float>(getDeltaTime())};
-  // angulo (em radianos) é incrementado se houver alguma rotação ativa
-  if(m_rotation[0] || m_rotation[1] ||m_rotation[2]){
-    //ajuste de velocidade de rotação, necessário para conseguirmos pausar
-    myTime = deltaTime;
+  // const float deltaTime{static_cast<float>(getDeltaTime())};
+  // // angulo (em radianos) é incrementado se houver alguma rotação ativa
+  // if(m_rotation.x || m_rotation.y ||m_rotation.z){
+  //   //ajuste de velocidade de rotação, necessário para conseguirmos pausar
+  //   myTime = deltaTime;
     
-    //incrementa ângulo de {x,y,z} se rotação em torno do eixo {x,y,z} estiver ativa
-    if(m_rotation[0])
-      m_angle[0] = glm::wrapAngle(m_angle[0] + glm::radians(45.0f) * myTime);
+  //   //incrementa ângulo de {x,y,z} se rotação em torno do eixo {x,y,z} estiver ativa
+  //   if(m_rotation.x)
+  //     m_angle.x = glm::wrapAngle(m_angle.x + glm::radians(45.0f) * myTime);
 
-    if(m_rotation[1])
-      m_angle[1] = glm::wrapAngle(m_angle[1] + glm::radians(45.0f) * myTime);
+  //   if(m_rotation.y)
+  //     m_angle.y = glm::wrapAngle(m_angle.y + glm::radians(45.0f) * myTime);
 
-    if(m_rotation[2])
-      m_angle[2] = glm::wrapAngle(m_angle[2] + glm::radians(45.0f) * myTime);
-  }
+  //   if(m_rotation.z)
+  //     m_angle.z = glm::wrapAngle(m_angle.z + glm::radians(45.0f) * myTime);
+  // }
   //debug
-  fmt::print("angle: {} {} {}\n", m_angle[0], m_angle[1], m_angle[2]);
+  fmt::print("angle: {} {} {}\n", m_angle.x, m_angle.y, m_angle.z);
   //fmt::print("myTime: {} delta: {}\n", myTime, deltaTime);
 
   // Clear color buffer and depth buffer
@@ -219,11 +219,11 @@ void OpenGLWindow::paintGL() {
 
   // atualizar variavel do angulo para dentro do vertex shader
   const GLint rotationXLoc{abcg::glGetUniformLocation(m_program, "rotationX")};
-  abcg::glUniform1f(rotationXLoc, m_angle[0]);
+  abcg::glUniform1f(rotationXLoc, m_angle.x);
   const GLint rotationYLoc{abcg::glGetUniformLocation(m_program, "rotationY")};
-  abcg::glUniform1f(rotationYLoc, m_angle[1]);
+  abcg::glUniform1f(rotationYLoc, m_angle.y);
   const GLint rotationZLoc{abcg::glGetUniformLocation(m_program, "rotationZ")};
-  abcg::glUniform1f(rotationZLoc, m_angle[2]);
+  abcg::glUniform1f(rotationZLoc, m_angle.z);
 
   // Draw triangles
   abcg::glDrawElements(GL_TRIANGLES, m_verticesToDraw, GL_UNSIGNED_INT,
@@ -258,9 +258,20 @@ void OpenGLWindow::paintUI() {
       ImGui::SliderFloat("X", &n_X, 0.0f, 360.0f, "%.3f degrees");
       ImGui::SliderFloat("Y", &n_Y, 0.0f, 360.0f, "%.3f degrees");
       ImGui::SliderFloat("Z", &n_Z, 0.0f, 360.0f, "%.3f degrees");
-      m_angle.x = glm::radians(n_X);
-      m_angle.y = glm::radians(n_Y);
-      m_angle.z = glm::radians(n_Z);
+      // m_angle.x = glm::radians(n_X);
+      // m_angle.y = glm::radians(n_Y);
+      // m_angle.z = glm::radians(n_Z);
+
+      ImGui::PopItemWidth();
+    }
+
+    //Botão jogar dado
+    {
+      ImGui::PushItemWidth(200);
+
+      if(ImGui::Button("Jogar!")){
+        jogarDado();
+      }
 
       ImGui::PopItemWidth();
     }
@@ -338,15 +349,25 @@ void OpenGLWindow::paintUI() {
   //     ImGui::Checkbox("Rotate Y", &rotateY);
   //     ImGui::Checkbox("Rotate Z", &rotateZ);
 
-  //     m_rotation[0] = rotateX;
-  //     m_rotation[1] = rotateY;
-  //     m_rotation[2] = rotateZ;
+  //     m_rotation.x = rotateX;
+  //     m_rotation.y = rotateY;
+  //     m_rotation.z = rotateZ;
       
   //   }
 
   //   ImGui::End();
   // }
 }
+
+void OpenGLWindow::jogarDado() {
+   // Start pseudo-random number generator
+  auto seed{std::chrono::steady_clock::now().time_since_epoch().count()};
+  m_randomEngine.seed(seed);
+
+  std::uniform_int_distribution<int> dist(1,6);
+  m_angle = glm::radians(angulosRetos[dist(m_randomEngine)]);
+}
+
 
 void OpenGLWindow::resizeGL(int width, int height) {
   m_viewportWidth = width;
