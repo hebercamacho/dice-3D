@@ -54,6 +54,7 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   std::vector<GLuint> m_indices; //arranjo de indices lido do arquivo OBJ que será enviado ao EBO
 
   bool dadoGirando = false;
+  bool posicaoDado = false; //false = esquerda, true = direita
   int quadros=0;
 
   void loadModelFromFile(std::string path); //função para carregamento do arquivo OBJ

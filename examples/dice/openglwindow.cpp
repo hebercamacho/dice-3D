@@ -208,7 +208,8 @@ void OpenGLWindow::paintGL() {
   const int maxQuadros = 600;
   if(dadoGirando){
     quadros++;
-    translation.x += (2.0f / maxQuadros);
+    if(posicaoDado) translation.x -= (2.0f / maxQuadros); //dado está na direita, mover pra esquerda
+    else translation.x += (2.0f / maxQuadros); //dado está na esquerda, mover pra direita
     translation.y = std::pow(translation.x, 2.0f) * (-1);
     fmt::print("q: {} translation: {} {}\n",quadros, translation.x, translation.y);
     if(quadros > maxQuadros){
@@ -400,11 +401,13 @@ void OpenGLWindow::jogarDado() {
    // Start pseudo-random number generator
   auto seed{std::chrono::steady_clock::now().time_since_epoch().count()};
   m_randomEngine.seed(seed);
-  
+  //reinicialização de variáveis para podermos parar o dado e jogar novamente
   quadros = 0;
   dadoGirando = false;
   m_rotation = {0,0,0};
   //translation = {0.0f,0.0f,0.0f};
+  posicaoDado = !posicaoDado;
+
   fmt::print("translation final: {} {}\n", translation.x, translation.y);
 
   std::uniform_int_distribution<int> idist(1,6);
