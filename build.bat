@@ -1,6 +1,6 @@
 @echo off
 
-set BUILD_TYPE=Debug
+set BUILD_TYPE=Release
 
 :: Reset build directory
 rd /s /q build 2>nul

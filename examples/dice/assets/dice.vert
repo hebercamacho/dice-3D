@@ -33,6 +33,6 @@ void main() {
                             newPosition.z);
   }
   
-  gl_Position = vec4(newPosition + translation, 2.0f);
-  fragColor = vec4(inColor, 3.0f);
+  gl_Position = vec4(newPosition + translation, 2.0f); //jogar ele um pouquinho pra trás, pra ficar menor
+  fragColor = vec4(inColor, 1.0f);
 }

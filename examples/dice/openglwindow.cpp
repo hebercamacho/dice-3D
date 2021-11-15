@@ -68,6 +68,7 @@ void OpenGLWindow::initializeGL() {
                                 sizeof(Vertex), nullptr);
   }
 
+  //aqui a gente passa a cor do vértice já pronta para o shader
   const GLint colorAttribute{abcg::glGetAttribLocation(m_program, "inColor")};
   if (colorAttribute >= 0) {
     abcg::glEnableVertexAttribArray(colorAttribute);
@@ -77,13 +78,13 @@ void OpenGLWindow::initializeGL() {
                                 reinterpret_cast<void*>(offset));
   }
 
-  
-
   abcg::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
 
   // End of binding to current VAO
   abcg::glBindBuffer(GL_ARRAY_BUFFER, 0);
   abcg::glBindVertexArray(0);
+
+  inicializarDado();
 }
 
 //carregar e ler o arquivo .obj, armazenar vertices e indices em m_vertices e m_indices.
@@ -111,10 +112,7 @@ void OpenGLWindow::loadModelFromFile(std::string path) {
 
   // A key:value map with key=Vertex and value=index
   std::unordered_map<Vertex, GLuint> hash{};
-  // fmt::print("shapes.at(0).mesh.material_ids.size(): {}\n", shapes.at(0).mesh.material_ids.size());
-  // fmt::print("shapes.at(0).points.indices.size(): {}\n", shapes.at(0).mesh.indices.size());
-  // fmt::print("shapes.at(0).mesh.num_face_vertices.size(): {}\n", shapes.at(0).mesh.num_face_vertices.size());
-  // fmt::print("shapes.at(0).mesh.tags.size(): {}\n", shapes.at(0).mesh.tags.size());
+
   // ler todos os triangulos e vertices
   for (const auto& shape : shapes) { 
     // pra cada um dos indices
@@ -132,14 +130,7 @@ void OpenGLWindow::loadModelFromFile(std::string path) {
       //se fizermos offset / 3 teremos o indice do triangulos?
       
       const auto material_id = shape.mesh.material_ids.at(offset/3);
-      // if(material_id !=1)
-      // fmt::print("material_id do triangulo: {}\n", (float)material_id);
-
-      // fmt::print("offset: {}\n", offset);
-      // fmt::print("shape.mesh.indices.size(): {}\n", shape.mesh.indices.size());
-      // fmt::print("index.vertex_index: {}\n", index.vertex_index);
-      // fmt::print("startIndex: {}\n", startIndex);
-
+      
       Vertex vertex{};
       vertex.position = {vx, vy, vz}; //a chave do vertex é sua posição
       vertex.color = {(float)material_id, (float)material_id, (float)material_id};
@@ -157,12 +148,12 @@ void OpenGLWindow::loadModelFromFile(std::string path) {
     }
   }
 }
-//função para centralizar e aplicar escala,
+
+//função para centralizar o modelo na origem e aplicar escala, 
+//normalizar as coordenadas de todos os vértices no intervalo [-1,1],
 //modificando vertices carregados do .obj para que a geometria caiba no volume de visão do pipeline gráfico,
 // que é o cubo de tamanho 2×2×2 centralizado em (0,0,0).
 void OpenGLWindow::standardize() {
-  // Center to origin and normalize largest bound to [-1, 1]
-
   // achar maiores e menores valores de x,y,z
   glm::vec3 max(std::numeric_limits<float>::lowest());
   glm::vec3 min(std::numeric_limits<float>::max());
@@ -184,75 +175,61 @@ void OpenGLWindow::standardize() {
 }
 
 void OpenGLWindow::paintGL() {
-  // const float deltaTime{static_cast<float>(getDeltaTime())};
-  // // angulo (em radianos) é incrementado se houver alguma rotação ativa
-  // if(m_rotation.x || m_rotation.y ||m_rotation.z){
-  //   //ajuste de velocidade de rotação, necessário para conseguirmos pausar
-  //   myTime = deltaTime;
-    
-  //   //incrementa ângulo de {x,y,z} se rotação em torno do eixo {x,y,z} estiver ativa
-  //   if(m_rotation.x)
-  //     m_angle.x = glm::wrapAngle(m_angle.x + glm::radians(45.0f) * myTime);
+  //quantos segundos se passaram desde a ultima atualização da tela
+  const float deltaTime{static_cast<float>(getDeltaTime())};
 
-  //   if(m_rotation.y)
-  //     m_angle.y = glm::wrapAngle(m_angle.y + glm::radians(45.0f) * myTime);
-
-  //   if(m_rotation.z)
-  //     m_angle.z = glm::wrapAngle(m_angle.z + glm::radians(45.0f) * myTime);
-  // }
-  //debug
-  //fmt::print("angle: {} {} {}\n", m_angle.x, m_angle.y, m_angle.z);
-  //fmt::print("myTime: {} delta: {}\n", myTime, deltaTime);
-
-  //Dado sendo girado
+  //Dado sendo girado, temos que definir algumas variáveis para ilustrar seu giro de forma realista
   if(dadoGirando){
-    const int maxQuadros = 1800; //número máximo de vezes que o quadro irá girar
-    const float deltaWidth = direcaoAleatoria(m_viewportWidth); //dividir a largura em varias frações pra irmos incrementando
-    const float deltaHeight = direcaoAleatoria(m_viewportHeight); //dividir a altura em varias frações pra irmos incrementando
-    //fmt::print("deltaWidth: {} deltaHeight: {}\n",deltaWidth, deltaHeight);
+    
     quadros++;
-    if(translation.x >= 1.0f) {
+    if(translation.x >= 1.5f) {
       movimentoDado.x = false;
-      giradinhaAleatoria();
+      velocidadeAngularAleatoria();
+      velocidadeDirecionalAleatoria();
     }
-    else if (translation.x <= -1.0f) {
+    else if (translation.x <= -1.5f) {
       movimentoDado.x = true;
-      giradinhaAleatoria();
+      velocidadeAngularAleatoria();
+      velocidadeDirecionalAleatoria();
     }
 
-    if(translation.y >= 1.0f) {
+    if(translation.y >= 1.5f) {
       movimentoDado.y = false;
-      giradinhaAleatoria();
+      velocidadeAngularAleatoria();
+      velocidadeDirecionalAleatoria();
     }
-    else if (translation.y <= -1.0f) {
+    else if (translation.y <= -1.5f) {
       movimentoDado.y = true;
-      giradinhaAleatoria();
+      velocidadeAngularAleatoria();
+      velocidadeDirecionalAleatoria();
     }
     
     //ir pra direita
     if(movimentoDado.x) {
-      translation.x += deltaWidth; 
+      translation.x += velocidadeDirecional.x; 
     }
     //ir pra esquerda
     else{
-      translation.x -= deltaWidth;
+      translation.x -= velocidadeDirecional.x;
     }
     //ir pra cima
     if(movimentoDado.y) {
-      translation.y += deltaHeight; 
+      translation.y += velocidadeDirecional.y; 
     }
     //ir pra baixo
     else{
-      translation.y -= deltaHeight;
+      translation.y -= velocidadeDirecional.y;
     }
 
     //fmt::print("q: {} translation: {} {}\n",quadros, translation.x, translation.y);
+    
+    //podemos finalizar o giro do dado e parar num número aleatório
     if(quadros > maxQuadros){
-      jogarDado();
+      pousarDado();
     }
   }
-  //quantos segundos se passaram desde a ultima atualização da tela
-  const float deltaTime{static_cast<float>(getDeltaTime())};
+
+  
   // angulo (em radianos) é incrementado se houver alguma rotação ativa
   if(m_rotation.x || m_rotation.y ||m_rotation.z){
     //ajuste de velocidade de rotação, necessário para conseguirmos pausar
@@ -279,12 +256,7 @@ void OpenGLWindow::paintGL() {
   abcg::glUseProgram(m_program); //usar shaders
   abcg::glBindVertexArray(m_VAO); //usar vao
 
-  //atualizar cor do vertice
-  // const GLint m_colorLoc = abcg::glGetUniformLocation(m_program, "color");  
-  // abcg::glUniform3f(m_colorLoc, 1,1,1);
-  //fmt::print("m_vertices[0].position.x: {} color r: {}\n",m_vertices[0].position.x, m_vertices[0].color.r);
-
-  // atualizar variavel do angulo para dentro do vertex shader
+  // atualizar variavel do angulo de rotação e posição de translação dentro do vertex shader
   const GLint rotationXLoc{abcg::glGetUniformLocation(m_program, "rotationX")};
   abcg::glUniform1f(rotationXLoc, m_angle.x);
   const GLint rotationYLoc{abcg::glGetUniformLocation(m_program, "rotationY")};
@@ -312,171 +284,88 @@ void OpenGLWindow::paintUI() {
     ImGui::PushItemWidth(200);
 
     if(ImGui::Button("Jogar!")){
-      giradinhaAleatoria();
+      tempoGirandoAleatorio();
+      velocidadeAngularAleatoria();
+      velocidadeDirecionalAleatoria();
       dadoGirando = true;
+      
     }
 
     ImGui::PopItemWidth();
     ImGui::End();
   }
-
-  // // Create window for slider
-  // {
-  //   ImGui::SetNextWindowPos(ImVec2(5, m_viewportHeight - 150));
-  //   ImGui::SetNextWindowSize(ImVec2(m_viewportWidth - 10, -1));
-  //   ImGui::Begin("Slider window", nullptr, ImGuiWindowFlags_NoDecoration);
-
-  //   // Create a slider to control the number of rendered triangles
-  //   {
-  //     // Slider will fill the space of the window
-  //     ImGui::PushItemWidth(m_viewportWidth - 25);
-  //     //definição do slider que controla o numero de triangulos que será renderizado
-  //     // static int n{m_verticesToDraw / 3};
-  //     // ImGui::SliderInt("", &n, 0, m_indices.size() / 3, "%d triangles");
-  //     // m_verticesToDraw = n * 3;
-
-  //     //Sliders de angulo
-  //     // static float n_X{glm::degrees(m_angle.x)}; 
-  //     // static float n_Y{glm::degrees(m_angle.y)}; 
-  //     // static float n_Z{glm::degrees(m_angle.z)};
-  //     // ImGui::SliderFloat("X", &n_X, 0.0f, 360.0f, "%.3f degrees");
-  //     // ImGui::SliderFloat("Y", &n_Y, 0.0f, 360.0f, "%.3f degrees");
-  //     // ImGui::SliderFloat("Z", &n_Z, 0.0f, 360.0f, "%.3f degrees");
-  //     // m_angle.x = glm::radians(n_X);
-  //     // m_angle.y = glm::radians(n_Y);
-  //     // m_angle.z = glm::radians(n_Z);
-
-  //     ImGui::PopItemWidth();
-  //   }
-
-  //   ImGui::End();
-  // }
-
-  // Create a window for the other widgets
-  // {
-  //   const auto widgetSize{ImVec2(172, 212)};
-  //   ImGui::SetNextWindowPos(ImVec2(m_viewportWidth - widgetSize.x - 5, 5));
-  //   ImGui::SetNextWindowSize(widgetSize);
-  //   ImGui::Begin("Widget window", nullptr, ImGuiWindowFlags_NoDecoration);
-  //   //checkbox para ativação de Face culling (descarte das faces não viradas para a tela)
-  //   static bool faceCulling{};
-  //   ImGui::Checkbox("Back-face culling", &faceCulling);
-
-  //   if (faceCulling) {
-  //     abcg::glEnable(GL_CULL_FACE);
-  //   } else {
-      // abcg::glDisable(GL_CULL_FACE);
-  //   }
-
-  //   // CW/CCW combo box
-  //   {
-  //     static std::size_t currentIndex{};
-  //     const std::vector<std::string> comboItems{"CW", "CCW"};
-
-  //     ImGui::PushItemWidth(70);
-  //     if (ImGui::BeginCombo("Front face",
-  //                           comboItems.at(currentIndex).c_str())) {
-  //       for (const auto index : iter::range(comboItems.size())) {
-  //         const bool isSelected{currentIndex == index};
-  //         if (ImGui::Selectable(comboItems.at(index).c_str(), isSelected))
-  //           currentIndex = index;
-  //         if (isSelected) ImGui::SetItemDefaultFocus();
-  //       }
-  //       ImGui::EndCombo();
-  //     }
-  //     ImGui::PopItemWidth();
-  //     //de acordo com o escolhido na combo box, define se a orientação dos indices é horario ou anti horario
-  //     //na pratica, isso vira o objeto do avesso, pois inverte o que é frente e o que é costas dos triangulos
-  //     if (currentIndex == 0) {
-        abcg::glFrontFace(GL_CW);
-  //     } else {
-  //       abcg::glFrontFace(GL_CCW);
-  //     }
-  //   }
-
-  //   // Número do dado box
-  //   {
-  //     static std::size_t currentIndex{};
-  //     const std::vector<std::string> comboItems{"1", "2", "3", "4", "5", "6"};
-
-  //     ImGui::PushItemWidth(70);
-  //     if (ImGui::BeginCombo("Dice Face",
-  //                           comboItems.at(currentIndex).c_str())) {
-  //       for (const auto index : iter::range(comboItems.size())) {
-  //         const bool isSelected{currentIndex == index};
-  //         if (ImGui::Selectable(comboItems.at(index).c_str(), isSelected))
-  //           currentIndex = index;
-  //         if (isSelected) ImGui::SetItemDefaultFocus();
-  //       }
-  //       ImGui::EndCombo();
-  //     }
-  //     ImGui::PopItemWidth();
-      
-  //     m_angle = glm::radians(angulosRetos[currentIndex]);
-  //   }
-
-  //   {
-  //     //checkbox para decisão de qual direção rotacionar
-  //     static bool rotateX{}, rotateY{}, rotateZ{};
-  //     ImGui::Checkbox("Rotate X", &rotateX);
-  //     ImGui::Checkbox("Rotate Y", &rotateY);
-  //     ImGui::Checkbox("Rotate Z", &rotateZ);
-
-  //     m_rotation.x = rotateX;
-  //     m_rotation.y = rotateY;
-  //     m_rotation.z = rotateZ;
-      
-  //   }
-
-  //   ImGui::End();
-  // }
+  
+  //virar a face pra fora
+  abcg::glFrontFace(GL_CW);
 }
 
-void OpenGLWindow::jogarDado() {
-   // Start pseudo-random number generator
+//função para começar o dado numa posição e número aleatório, além de inicializar algumas outras variáveis necessárias
+void OpenGLWindow::inicializarDado() {
+  // Inicializar gerador de números pseudo-aleatórios
   auto seed{std::chrono::steady_clock::now().time_since_epoch().count()};
   m_randomEngine.seed(seed);
+  
+  //estado inicial de algumas variáveis
+  m_rotation = {0, 0, 0};  
+  velocidadeAngular = {0.0f, 0.0f, 0.0f};
+  myTime = 0.0f;
+  quadros=0;
+
+  std::uniform_real_distribution<float> fdist(-1.5f,1.5f);
+  translation = {fdist(m_randomEngine),fdist(m_randomEngine),0.0f};
+  pousarDado(); //começar num numero aleatorio
+}
+
+//função para fazer o dado parar numa das faces retas aleatoriamente
+void OpenGLWindow::pousarDado() {
   //reinicialização de variáveis para podermos parar o dado e jogar novamente
   quadros = 0;
   dadoGirando = false;
   m_rotation = {0,0,0};
-  //translation = {0.0f,0.0f,0.0f};
 
-  fmt::print("translation final: {} {}\n", translation.x, translation.y);
+  //fmt::print("translation final: {} {}\n", translation.x, translation.y);
 
   std::uniform_int_distribution<int> idist(1,6);
-  m_angle = glm::radians(angulosRetos[idist(m_randomEngine)]);
+  const int numeroDoDado = idist(m_randomEngine);
+  m_angle.x = glm::radians(angulosRetos[numeroDoDado].x);
+  m_angle.y = glm::radians(angulosRetos[numeroDoDado].y);
 }
 
-void OpenGLWindow::giradinhaAleatoria(){
-  // Start pseudo-random number generator
-  auto seed{std::chrono::steady_clock::now().time_since_epoch().count()};
-  m_randomEngine.seed(seed);
-  
-  //distribuição aleatória entre 0 e 1, porque não precisamos girar em todos os eixos
-  std::uniform_int_distribution<int> idist(0,1);
-  // m_rotation = {idist(m_randomEngine), idist(m_randomEngine), idist(m_randomEngine)};
-  m_rotation = {1, 1, 1};
+//função para definir tempo de giro do dado, algo entre 2 e 5 segundos 
+void OpenGLWindow::tempoGirandoAleatorio(){
+  const float FPS = ImGui::GetIO().Framerate;
+  //distribuição aleatória para definir tempo de giro do dado, algo entre 2 e 5 segundos 
+  std::uniform_int_distribution<int> idist((int)FPS * 2, (int)FPS * 5);
+  maxQuadros = idist(m_randomEngine); //número máximo de quadros/vezes que o dado irá girar
+  //fmt::print("maxQuadros: {}\n",maxQuadros);
+}
+
+//atualiza as velocidades de cada um dos eixos de forma aleatória
+void OpenGLWindow::velocidadeAngularAleatoria(){
+  //distribuição aleatória entre 0 e 2, para girar somente 1 eixo
+  m_rotation = {0, 0, 0};
+  std::uniform_int_distribution<int> idist(0,2);
+  m_rotation[idist(m_randomEngine)] = 1;
   //fmt::print("m_rotation.x: {} m_rotation.y: {} m_rotation.z: {}\n",m_rotation.x,m_rotation.y,m_rotation.z);
 
+  const float FPS = ImGui::GetIO().Framerate; //(para calcular os segundos precisamos do número inteiro de FPS)
+  //fmt::print("FPS: {}\n",FPS);
+
   //distribuição aleatória de velocidade angular, para girar em cada eixo numa velocidade
-  std::uniform_real_distribution<float> fdist(360.0f,720.0f);
+  std::uniform_real_distribution<float> fdist(FPS * 2, FPS * 4);
   velocidadeAngular = {glm::radians(fdist(m_randomEngine))
                       ,glm::radians(fdist(m_randomEngine))
                       ,glm::radians(fdist(m_randomEngine))};
   //fmt::print("velocidadeAngular.x: {} velocidadeAngular.y: {} velocidadeAngular.z: {}\n",velocidadeAngular.x,velocidadeAngular.y,velocidadeAngular.z);
 }
 
-float OpenGLWindow::direcaoAleatoria(int dimension){
-  // Start pseudo-random number generator
-  auto seed{std::chrono::steady_clock::now().time_since_epoch().count()};
-  m_randomEngine.seed(seed);
-
-  //distribuição aleatória de velocidade angular, para girar em cada eixo numa velocidade
-  std::uniform_real_distribution<float> fdist(1.0f,10.0f);
-  const float direcao = fdist(m_randomEngine) / dimension;
-  fmt::print("direcaoAleatoria: {}\n", direcao);
-  return direcao;
+//recebe uma das dimensões da janela e retorna uma fração aleatória do seu tamanho
+void OpenGLWindow::velocidadeDirecionalAleatoria(){
+  //distribuição aleatória de velocidade, para andar em cada eixo numa velocidade
+  std::uniform_real_distribution<float> fdist(0.000005f,0.00001f);
+  velocidadeDirecional.x = fdist(m_randomEngine) * m_viewportWidth;
+  velocidadeDirecional.y = fdist(m_randomEngine) * m_viewportHeight;
+  //fmt::print("velocidadeDirecionalAleatoria: {}\n", direcao);
 }
 
 void OpenGLWindow::resizeGL(int width, int height) {
