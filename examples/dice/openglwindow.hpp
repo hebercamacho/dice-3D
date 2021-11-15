@@ -36,6 +36,15 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   int m_verticesToDraw{}; //quantidade de vértices do VBO que será processada pela função de renderização, glDrawElements
   glm::ivec3 m_rotation{0,0,0}; // nos ajuda a decidir qual a direção da rotação
   float myTime{0.0f};
+  std::array<glm::vec3, 6> angulosRetos{
+    //glm::vec3{0.0f,0.0f,0.0f}, //0 apenas pra manter o numero do dado igual ao numero do indice
+    glm::vec3{115.0f,108.0f,45.0f}, //1
+    glm::vec3{342.0f,167.0f,15.0f}, //2
+    glm::vec3{68.0f,193.0f,13.0f}, //3
+    glm::vec3{68.0f,14.0f,77.0f},//4
+    glm::vec3{342.0f,347.0f,75.0f}, //5 
+    glm::vec3{115.0f,288.0f,45.0f} //6
+  };
 
   std::vector<Vertex> m_vertices; //arranjo de vértices lido do arquivo OBJ que será enviado ao VBO
   std::vector<GLuint> m_indices; //arranjo de indices lido do arquivo OBJ que será enviado ao EBO

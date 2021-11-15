@@ -242,34 +242,36 @@ void OpenGLWindow::paintUI() {
   abcg::OpenGLWindow::paintUI();
 
   // Create window for slider
-  // {
-  //   ImGui::SetNextWindowPos(ImVec2(5, m_viewportHeight - 150));
-  //   ImGui::SetNextWindowSize(ImVec2(m_viewportWidth - 10, -1));
-  //   ImGui::Begin("Slider window", nullptr, ImGuiWindowFlags_NoDecoration);
+  {
+    ImGui::SetNextWindowPos(ImVec2(5, m_viewportHeight - 150));
+    ImGui::SetNextWindowSize(ImVec2(m_viewportWidth - 10, -1));
+    ImGui::Begin("Slider window", nullptr, ImGuiWindowFlags_NoDecoration);
 
-  //   // Create a slider to control the number of rendered triangles
-  //   {
-  //     // Slider will fill the space of the window
-  //     ImGui::PushItemWidth(m_viewportWidth - 25);
-  //     //definição do slider que controla o numero de triangulos que será renderizado
-  //     // static int n{m_verticesToDraw / 3};
-  //     // ImGui::SliderInt("", &n, 0, m_indices.size() / 3, "%d triangles");
-  //     // m_verticesToDraw = n * 3;
+    // Create a slider to control the number of rendered triangles
+    {
+      // Slider will fill the space of the window
+      ImGui::PushItemWidth(m_viewportWidth - 25);
+      //definição do slider que controla o numero de triangulos que será renderizado
+      // static int n{m_verticesToDraw / 3};
+      // ImGui::SliderInt("", &n, 0, m_indices.size() / 3, "%d triangles");
+      // m_verticesToDraw = n * 3;
 
-  //     //Sliders de angulo
-  //     // static float n_X{0.0f}; static float n_Y{0.0f}; static float n_Z{0.0f};
-  //     // ImGui::SliderFloat("X", &n_X, 0.0f, 360.0f, "%.3f degrees");
-  //     // ImGui::SliderFloat("Y", &n_Y, 0.0f, 360.0f, "%.3f degrees");
-  //     // ImGui::SliderFloat("Z", &n_Z, 0.0f, 360.0f, "%.3f degrees");
-  //     // m_angle.x = glm::radians(n_X);
-  //     // m_angle.y = glm::radians(n_Y);
-  //     // m_angle.z = glm::radians(n_Z);
+      //Sliders de angulo
+      static float n_X{glm::degrees(m_angle.x)}; 
+      static float n_Y{glm::degrees(m_angle.y)}; 
+      static float n_Z{glm::degrees(m_angle.z)};
+      ImGui::SliderFloat("X", &n_X, 0.0f, 360.0f, "%.3f degrees");
+      ImGui::SliderFloat("Y", &n_Y, 0.0f, 360.0f, "%.3f degrees");
+      ImGui::SliderFloat("Z", &n_Z, 0.0f, 360.0f, "%.3f degrees");
+      m_angle.x = glm::radians(n_X);
+      m_angle.y = glm::radians(n_Y);
+      m_angle.z = glm::radians(n_Z);
 
-  //     ImGui::PopItemWidth();
-  //   }
+      ImGui::PopItemWidth();
+    }
 
-  //   ImGui::End();
-  // }
+    ImGui::End();
+  }
 
   // Create a window for the other widgets
   {
@@ -311,6 +313,27 @@ void OpenGLWindow::paintUI() {
       } else {
         abcg::glFrontFace(GL_CCW);
       }
+    }
+
+    // Número do dado box
+    {
+      static std::size_t currentIndex{};
+      const std::vector<std::string> comboItems{"1", "2", "3", "4", "5", "6"};
+
+      ImGui::PushItemWidth(70);
+      if (ImGui::BeginCombo("Dice Face",
+                            comboItems.at(currentIndex).c_str())) {
+        for (const auto index : iter::range(comboItems.size())) {
+          const bool isSelected{currentIndex == index};
+          if (ImGui::Selectable(comboItems.at(index).c_str(), isSelected))
+            currentIndex = index;
+          if (isSelected) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+      }
+      ImGui::PopItemWidth();
+      
+      m_angle = glm::radians(angulosRetos[currentIndex]);
     }
 
     {
