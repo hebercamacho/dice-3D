@@ -363,7 +363,7 @@ void OpenGLWindow::velocidadeAngularAleatoria(){
 void OpenGLWindow::velocidadeDirecionalAleatoria(){
   const float deltaTime{static_cast<float>(getDeltaTime())};
   //distribuição aleatória de velocidade, para andar em cada eixo numa velocidade
-  std::uniform_real_distribution<float> fdist(deltaTime / 20.0f, deltaTime / 10.0f);
+  std::uniform_real_distribution<float> fdist(deltaTime / 200.0f, deltaTime / 100.0f);
   velocidadeDirecional.x = fdist(m_randomEngine) * m_viewportWidth;
   velocidadeDirecional.y = fdist(m_randomEngine) * m_viewportHeight;
   //fmt::print("velocidadeDirecionalAleatoria: {}\n", direcao);
