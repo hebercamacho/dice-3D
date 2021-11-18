@@ -201,6 +201,8 @@ void Dices::jogarDado(Dice &dice){
 
 //função para fazer o dado parar numa das faces retas aleatoriamente
 void Dices::pousarDado(Dice &dice) {
+  auto seed{std::chrono::steady_clock::now().time_since_epoch().count()};
+  m_randomEngine.seed(seed);
   //reinicialização de variáveis para podermos parar o dado e jogar novamente
   dice.quadros = 0;
   dice.dadoGirando = false;
