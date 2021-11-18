@@ -27,5 +27,5 @@ Héber Camacho Desterro RA: 11069416
     - eixo a ser rotacionado (para efeito mais realista),
     - tempo em que o dado permanecerá girando.
 - [x] Botão da biblioteca ImGui para jogar o dado quantas vezes quiser
-- [ ] Separação da classe Dice para gerar vários dados
+- [x] Separação da classe Dice para gerar vários dados
 - [ ] Combo ou Slider da biblioteca ImGui para decidir quantos dados gerar
