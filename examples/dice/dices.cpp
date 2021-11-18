@@ -17,10 +17,10 @@ void Dices::initializeGL(GLuint program, int quantity, std::vector<Vertex> verti
   m_dices.clear();
   m_dices.resize(quantity);
 
-  // //fmt::print("m_program: {}\n", m_program);
-  // //fmt::print("m_vertices.size(): {}\n", m_vertices.size());
-  // //fmt::print("m_indices.size(): {}\n", m_indices.size());
-  // //fmt::print("m_verticesToDraw: {}\n", m_verticesToDraw);
+  //fmt::print("m_program: {}\n", m_program);
+  //fmt::print("m_vertices.size(): {}\n", m_vertices.size());
+  //fmt::print("m_indices.size(): {}\n", m_indices.size());
+  //fmt::print("m_verticesToDraw: {}\n", m_verticesToDraw);
 
   for(auto &dice : m_dices) {
     dice = inicializarDado();
@@ -40,7 +40,8 @@ void Dices::paintGL(int viewportWidth, int viewportHeight, float deltaTime){
 
     //Dado sendo girado, temos que definir algumas variáveis para ilustrar seu giro de forma realista
     if(dice.dadoGirando){
-      
+      checkCollisions(dice);
+
       dice.quadros++;
       if(dice.translation.x >= 1.5f) {
         dice.movimentoDado.x = false;
@@ -253,6 +254,31 @@ void Dices::velocidadeDirecionalAleatoria(Dice &dice){
   dice.velocidadeDirecional.y = fdist(m_randomEngine) * m_viewportHeight;
   //fmt::print("m_deltaTime: {}\n", m_deltaTime);
   ////fmt::print("velocidadeDirecional.x: {} velocidadeDirecional.y: {}\n", dice.velocidadeDirecional.x, dice.velocidadeDirecional.y);
+}
+
+//a função retorna true se o dado passado como parâmetro está colidindo com algum outro e deveria voltar pra outra direção
+void Dices::checkCollisions(Dice &current_dice) {
+  // Check collision between ship and asteroids
+  for(auto &dice : m_dices) {
+    if(&dice != &current_dice)
+    {
+      const auto distance{
+          glm::distance(current_dice.translation, dice.translation)};
+
+      if (distance < 1.2f) {
+        if(!current_dice.dadoColidindo) {
+          current_dice.dadoColidindo = true;
+          //dice.dadoColidindo = true;
+          current_dice.movimentoDado.x = !current_dice.movimentoDado.x;
+          current_dice.movimentoDado.y = !current_dice.movimentoDado.y;
+          //jogarDado(current_dice);
+        }
+        return;
+      }
+    }
+  }
+  current_dice.dadoColidindo = false;
+  return;
 }
 
 void Dices::terminateGL(){

@@ -26,7 +26,7 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   int m_viewportHeight{};
 
   void loadModelFromFile(std::string_view path);
-  void standardize(); 
+  void standardize();
 };
 
 #endif

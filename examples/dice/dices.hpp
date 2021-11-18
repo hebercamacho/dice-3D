@@ -48,7 +48,8 @@ class Dices {
       glm::bvec2 movimentoDado{true, true}; //false = irá pra esquerda/baixo, true = irá pra direita/cima
 
       float myTime{}; //auxiliar para conseguirmos não girar o tempo todo
-      bool dadoGirando = false; //indica se o dado deve estar girando 
+      bool dadoGirando{false}; //indica se o dado deve estar girando 
+      bool dadoColidindo{false};
       int quadros; //contador de quadros, auxilia no tempo que o dado fica girando
       int maxQuadros;
     };
@@ -63,7 +64,7 @@ class Dices {
       glm::vec3{105.0f,300.0f,45.0f} //6
     };
 
-    std::list<Dice> m_dices;
+    std::vector<Dice> m_dices;
 
     std::default_random_engine m_randomEngine; //gerador de números pseudo-aleatórios
 
@@ -73,6 +74,7 @@ class Dices {
     void velocidadeAngularAleatoria(Dice&); 
     void velocidadeDirecionalAleatoria(Dice&); 
     void tempoGirandoAleatorio(Dice&);
+    void checkCollisions(Dice&);
 };
 
 #endif
