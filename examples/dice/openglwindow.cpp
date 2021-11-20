@@ -41,8 +41,8 @@ void OpenGLWindow::initializeGL() {
   #endif
 
   m_verticesToDraw = m_indices.size();
-
-  m_dices.initializeGL(m_program, 2, m_vertices, m_indices, m_verticesToDraw);
+  //fmt::print("quantity: {}\n", quantity);
+  m_dices.initializeGL(m_program, quantity, m_vertices, m_indices, m_verticesToDraw);
 }
 
 //carregar e ler o arquivo .obj, armazenar vertices e indices em m_vertices e m_indices.
@@ -145,21 +145,45 @@ void OpenGLWindow::paintGL() {
 
 void OpenGLWindow::paintUI() {
   abcg::OpenGLWindow::paintUI();
-  //Botão jogar dado
+  //Janela de opções
   {
-    ImGui::SetNextWindowPos(ImVec2(5,15));
-    ImGui::SetNextWindowSize(ImVec2(70, 40));
+    ImGui::SetNextWindowPos(ImVec2(5,5));
+    ImGui::SetNextWindowSize(ImVec2(128, 70));
     ImGui::Begin("Button window", nullptr, ImGuiWindowFlags_NoDecoration);
-    ImGui::PushItemWidth(200);
 
+    ImGui::PushItemWidth(200);
+    //Botão jogar dado
     if(ImGui::Button("Jogar!")){
       for(auto &dice : m_dices.m_dices){
         m_dices.jogarDado(dice);
       }
       
     }
-
     ImGui::PopItemWidth();
+    // Number of dices combo box
+    {
+      static std::size_t currentIndex{};
+      const std::vector<std::string> comboItems{"1", "2", "3"};
+
+      ImGui::PushItemWidth(70);
+      if (ImGui::BeginCombo("Dados",
+                            comboItems.at(currentIndex).c_str())) {
+        for (const auto index : iter::range(comboItems.size())) {
+          const bool isSelected{currentIndex == index};
+          if (ImGui::Selectable(comboItems.at(index).c_str(), isSelected))
+            currentIndex = index;
+          if (isSelected) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+      }
+      ImGui::PopItemWidth();
+      if(quantity != currentIndex + 1){
+        quantity = currentIndex + 1;
+        initializeGL();
+      }
+    }
+
+    
     ImGui::End();
   }
   

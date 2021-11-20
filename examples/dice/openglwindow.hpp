@@ -21,6 +21,7 @@ class OpenGLWindow : public abcg::OpenGLWindow {
   int m_verticesToDraw{}; //quantidade de vértices do VBO que será processada pela função de renderização, glDrawElements
 
   Dices m_dices;
+  int quantity{1};
 
   int m_viewportWidth{};
   int m_viewportHeight{};

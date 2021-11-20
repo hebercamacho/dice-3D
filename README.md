@@ -28,5 +28,5 @@ Héber Camacho Desterro RA: 11069416
     - tempo em que o dado permanecerá girando.
 - [x] Botão da biblioteca ImGui para jogar o dado quantas vezes quiser
 - [x] Separação da classe Dice para gerar vários dados
-- [ ] Combo ou Slider da biblioteca ImGui para decidir quantos dados gerar
+- [x] Combo ou Slider da biblioteca ImGui para decidir quantos dados gerar
 - [x] Utilização da função de distância para checar colisões entre os dados, evitando sobreposição
