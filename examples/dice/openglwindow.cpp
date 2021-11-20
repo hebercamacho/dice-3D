@@ -177,7 +177,7 @@ void OpenGLWindow::paintUI() {
         ImGui::EndCombo();
       }
       ImGui::PopItemWidth();
-      if(quantity != currentIndex + 1){
+      if(quantity != (int)currentIndex + 1){
         quantity = currentIndex + 1;
         initializeGL();
       }
